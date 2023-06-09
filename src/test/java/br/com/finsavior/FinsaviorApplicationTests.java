@@ -1,0 +1,13 @@
+package br.com.finsavior;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class FinsaviorApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
