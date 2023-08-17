@@ -1,4 +1,4 @@
-package br.com.finsavior.enums;
+package br.com.finsavior.model.enums;
 
 public enum UserRoleEnum {
     ROLE_USER,

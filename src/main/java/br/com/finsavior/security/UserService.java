@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import br.com.finsavior.repository.UserRepository;
 
 import org.springframework.security.core.userdetails.UserDetails;
-import br.com.finsavior.entities.User;
+import br.com.finsavior.model.entities.User;
 import java.util.Optional;
 
 @Service

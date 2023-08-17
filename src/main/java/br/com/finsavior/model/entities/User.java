@@ -1,4 +1,4 @@
-package br.com.finsavior.entities;
+package br.com.finsavior.model.entities;
 
 import java.util.HashSet;
 import java.util.Objects;

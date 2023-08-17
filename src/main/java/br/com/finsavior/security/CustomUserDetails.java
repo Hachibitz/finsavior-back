@@ -1,6 +1,6 @@
 package br.com.finsavior.security;
 
-import br.com.finsavior.entities.User;
+import br.com.finsavior.model.entities.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

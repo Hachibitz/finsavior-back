@@ -1,8 +1,8 @@
-package br.com.finsavior.entities;
+package br.com.finsavior.model.entities;
 
 import java.util.Objects;
 
-import br.com.finsavior.enums.UserRoleEnum;
+import br.com.finsavior.model.enums.UserRoleEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

@@ -10,7 +10,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import br.com.finsavior.model.LoginRequest;
+import br.com.finsavior.model.dto.LoginRequestDTO;
 import br.com.finsavior.security.TokenProvider;
 import br.com.finsavior.service.LoginService;
 
@@ -28,7 +28,7 @@ public class LoginServiceImpl implements LoginService{
     }
 
 	@Override
-	public ResponseEntity<String> login(LoginRequest loginRequest){
+	public ResponseEntity<String> login(LoginRequestDTO loginRequest){
 		logger.info("Autenticando usuário: "+ loginRequest.getUsername()+ "...");
 		try {
             Authentication authentication = authenticationManager.authenticate(

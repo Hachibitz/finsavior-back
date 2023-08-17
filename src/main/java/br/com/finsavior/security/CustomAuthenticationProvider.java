@@ -13,7 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import br.com.finsavior.entities.User;
+import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.UserRepository;
 
 @Component
