@@ -19,7 +19,7 @@ public class MainTableServiceImpl implements MainTableService {
     @Autowired
     MainTableRepository repository;
 
-    Logger logger = LoggerFactory.getLogger(LoginServiceImpl.class);
+    Logger logger = LoggerFactory.getLogger(MainTableServiceImpl.class);
 
     @Override
     public ResponseEntity<MainTableRegisterResponseDTO> billRegister(MainTableRegisterRequestDTO mainTableRegisterRequestDTO) {
