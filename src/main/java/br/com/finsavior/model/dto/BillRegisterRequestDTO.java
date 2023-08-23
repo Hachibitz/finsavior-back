@@ -1,13 +1,14 @@
 package br.com.finsavior.model.dto;
 
-public class MainTableRegisterRequestDTO {
+public class BillRegisterRequestDTO {
     private String billType;
     private String billDate;
     private String billName;
     private double billValue;
     private String billDescription;
+    private String billTable;
 
-    public MainTableRegisterRequestDTO() {
+    public BillRegisterRequestDTO() {
     }
 
     public String getBillType() {
@@ -48,5 +49,13 @@ public class MainTableRegisterRequestDTO {
 
     public void setBillDescription(String billDescription) {
         this.billDescription = billDescription;
+    }
+
+    public String getBillTable() {
+        return billTable;
+    }
+
+    public void setBillTable(String billTable) {
+        this.billTable = billTable;
     }
 }

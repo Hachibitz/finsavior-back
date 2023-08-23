@@ -3,19 +3,24 @@ syntax="proto3";
 option java_package = "br.com.finsavior.grpc.maintable";
 option java_multiple_files = true;
 
-message MainTableResponseDTO {
+message BillRegisterResponse {
   string status = 1;
-  MainTableRequestDTO message = 2;
+  BillRegisterRequest message = 2;
 }
 
-message MainTableRequestDTO {
+message BillRegisterRequest {
   string billType = 1;
   string billDate = 2;
   string billName = 3;
   double billValue = 4;
   string billDescription = 5;
+  string billTable = 6;
 }
 
 service MainService {
-  rpc billRegister(MainTableRequestDTO) returns (MainTableResponseDTO);
+  rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
+}
+
+service CardService {
+  rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
 }

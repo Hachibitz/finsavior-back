@@ -1,15 +1,15 @@
 package br.com.finsavior.model.dto;
 
-import br.com.finsavior.grpc.maintable.MainTableRequestDTO;
+import br.com.finsavior.grpc.maintable.BillRegisterRequest;
 
-public class MainTableRegisterResponseDTO {
+public class BillRegisterResponseDTO {
     private String status;
-    private MainTableRequestDTO message;
+    private BillRegisterRequest message;
 
-    public MainTableRegisterResponseDTO() {
+    public BillRegisterResponseDTO() {
     }
 
-    public MainTableRegisterResponseDTO(String status, MainTableRequestDTO message) {
+    public BillRegisterResponseDTO(String status, BillRegisterRequest message) {
         this.status = status;
         this.message = message;
     }
@@ -22,11 +22,11 @@ public class MainTableRegisterResponseDTO {
         this.status = status;
     }
 
-    public MainTableRequestDTO getMessage() {
+    public BillRegisterRequest getMessage() {
         return message;
     }
 
-    public void setMessage(MainTableRequestDTO message) {
+    public void setMessage(BillRegisterRequest message) {
         this.message = message;
     }
 
