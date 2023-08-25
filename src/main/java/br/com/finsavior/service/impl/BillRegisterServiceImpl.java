@@ -9,9 +9,11 @@ import br.com.finsavior.repository.MainTableRepository;
 import br.com.finsavior.service.BillRegisterService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -49,12 +51,12 @@ public class BillRegisterServiceImpl implements BillRegisterService {
         try {
             BillRegisterResponse billRegisterResponse = mainServiceBlockingStub.billRegister(mainTableRequestDTO);
             BillRegisterResponseDTO response = new BillRegisterResponseDTO(billRegisterResponse.getStatus(), billRegisterResponse.getMessage());
-
             logger.info("Registro de tabela principal salvo.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.info(e.getMessage());
-            return null;
+            BillRegisterResponseDTO response = new BillRegisterResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }
