@@ -19,6 +19,6 @@ public class SignUpController {
 
     @PostMapping("/signup")
     public ResponseEntity<SignUpResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO) {
-        return userService.SignUp(signUpRequestDTO);
+        return userService.signUp(signUpRequestDTO);
     }
 }

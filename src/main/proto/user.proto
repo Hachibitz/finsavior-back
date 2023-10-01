@@ -15,6 +15,17 @@ message SignUpResponse {
   string message = 1;
 }
 
+message DeleteAccountRequest {
+  string username = 1;
+  string password = 2;
+  bool confirmation = 3;
+}
+
+message DeleteAccountResponse {
+  string message = 1;
+}
+
 service UserService {
   rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
 }
