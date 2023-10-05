@@ -11,10 +11,10 @@ import br.com.finsavior.model.entities.User;
 import java.util.Optional;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserSecurityDetails implements UserDetailsService {
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserSecurityDetails(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

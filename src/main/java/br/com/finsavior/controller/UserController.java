@@ -7,25 +7,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import br.com.finsavior.model.dto.LoginRequestDTO;
-import br.com.finsavior.service.LoginService;
-
 @RestController
-@RequestMapping("user")
+@RequestMapping("users")
 public class UserController {
-	
-	@Autowired
-	LoginService loginService;
 
     @Autowired
     UserService userService;
-    
-    @PostMapping("/login-auth")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDTO loginRequest) {
-        return loginService.login(loginRequest);
-    }
 
     @PostMapping("/delete-account")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> deleteAccountAndData(@RequestBody DeleteAccountRequestDTO deleteAccountRequest) {
         return userService.deleteAccount(deleteAccountRequest);
     }

@@ -8,7 +8,5 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface UserService {
-    public ResponseEntity<SignUpResponseDTO> signUp(SignUpRequestDTO signUpRequestDTO);
-
     public ResponseEntity<?> deleteAccount(DeleteAccountRequestDTO deleteAccountRequestDTO);
 }

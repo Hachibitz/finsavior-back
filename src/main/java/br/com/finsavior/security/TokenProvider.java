@@ -21,10 +21,10 @@ public class TokenProvider {
     private int jwtExpirationMs;
     
     @Autowired
-    UserService userService;
+    UserSecurityDetails userSecurityDetails;
 
     public String generateToken(Authentication authentication) {
-        CustomUserDetails customUserDetails = (CustomUserDetails) userService.loadUserByUsername(authentication.getPrincipal().toString());
+        CustomUserDetails customUserDetails = (CustomUserDetails) userSecurityDetails.loadUserByUsername(authentication.getPrincipal().toString());
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
@@ -40,6 +40,7 @@ public class TokenProvider {
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
 
@@ -48,7 +49,7 @@ public class TokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(jwtSecret).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

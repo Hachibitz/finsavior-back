@@ -28,7 +28,7 @@ import org.springframework.web.filter.CorsFilter;
 import br.com.finsavior.security.CustomAuthenticationProvider;
 import br.com.finsavior.security.JWTAuthenticationFilter;
 import br.com.finsavior.security.TokenProvider;
-import br.com.finsavior.security.UserService;
+import br.com.finsavior.security.UserSecurityDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -40,7 +40,7 @@ public class SecurityConfig {
 	private final CustomAuthenticationProvider customAuthenticationProvider;
 	
 	@Autowired
-	UserService userService;
+    UserSecurityDetails userSecurityDetails;
 	
 	@Autowired
 	TokenProvider tokenProvider;
@@ -65,7 +65,7 @@ public class SecurityConfig {
 		).logout(logout -> logout.logoutUrl("/logout")
 		).csrf(csrf -> csrf.disable());
 		
-		JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter(tokenProvider, userService);
+		JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter(tokenProvider, userSecurityDetails);
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();

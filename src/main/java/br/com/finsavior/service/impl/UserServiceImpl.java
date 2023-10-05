@@ -41,28 +41,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<SignUpResponseDTO> signUp(SignUpRequestDTO signUpRequestDTO) {
-        SignUpRequest signUpRequest = SignUpRequest.newBuilder()
-                .setEmail(signUpRequestDTO.getEmail())
-                .setUsername(signUpRequestDTO.getUsername())
-                .setFirstName(signUpRequestDTO.getFirstName())
-                .setLastName(signUpRequestDTO.getLastName())
-                .setPassword(signUpRequestDTO.getPassword())
-                .build();
-
-        try {
-            SignUpResponse signUpResponse = userServiceBlockingStub.signUp(signUpRequest);
-            SignUpResponseDTO response = new SignUpResponseDTO(HttpResponseStatus.CREATED.toString(), signUpResponse.getMessage());
-            logger.info("Usuário registrado com sucesso!");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            SignUpResponseDTO response = new SignUpResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), "Falha no registro");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    @Override
     public ResponseEntity<?> deleteAccount(DeleteAccountRequestDTO deleteAccountRequestDTO) {
         DeleteAccountRequest message = DeleteAccountRequest.newBuilder()
                 .setUsername(deleteAccountRequestDTO.getUsername())

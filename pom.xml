@@ -16,9 +16,15 @@
 	<properties>
 		<java.version>17</java.version>
 		<grpc.java.version>1.57.2</grpc.java.version>
+		<protobuf.serializer.version>7.4.0</protobuf.serializer.version>
+		<spring-kafka.version>3.0.11</spring-kafka.version>
 	</properties>
 
 	<repositories>
+		<repository>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2/</url>
+		</repository>
 		<repository>
 			<id>confluent</id>
 			<url>https://packages.confluent.io/maven/</url>
@@ -29,6 +35,7 @@
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
+			<version>${spring-kafka.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
@@ -38,7 +45,13 @@
 		<dependency>
 			<groupId>io.confluent</groupId>
 			<artifactId>kafka-protobuf-serializer</artifactId>
-			<version>7.4.0</version>
+			<version>${protobuf.serializer.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.ws.rs</groupId>
+					<artifactId>javax.ws.rs-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -58,7 +71,7 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
-			<version>0.9.1</version>
+			<version>0.12.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>

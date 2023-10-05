@@ -21,11 +21,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 	@Autowired
     TokenProvider tokenProvider;
 	
-    private final UserService userService;
+    private final UserSecurityDetails userSecurityDetails;
 
-    public JWTAuthenticationFilter(TokenProvider tokenProvider, UserService userService) {
+    public JWTAuthenticationFilter(TokenProvider tokenProvider, UserSecurityDetails userSecurityDetails) {
         this.tokenProvider = tokenProvider;
-        this.userService = userService;
+        this.userSecurityDetails = userSecurityDetails;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && tokenProvider.validateToken(token)) {
             String username = tokenProvider.getUsernameFromToken(token);
-            UserDetails userDetails = userService.loadUserByUsername(username);
+            UserDetails userDetails = userSecurityDetails.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
