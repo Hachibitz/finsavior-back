@@ -1,7 +1,8 @@
 package br.com.finsavior.service.impl;
 
-import br.com.finsavior.grpc.user.SignUpRequest;
-import br.com.finsavior.grpc.user.SignUpResponse;
+import br.com.finsavior.grpc.security.AuthServiceGrpc;
+import br.com.finsavior.grpc.security.SignUpRequest;
+import br.com.finsavior.grpc.security.SignUpResponse;
 import br.com.finsavior.grpc.user.UserServiceGrpc;
 import br.com.finsavior.model.dto.LoginRequestDTO;
 import br.com.finsavior.model.dto.SignUpRequestDTO;
@@ -32,17 +33,17 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
 
-    private final UserServiceGrpc.UserServiceBlockingStub userServiceBlockingStub;
+    private final AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub;
 
     public AuthServiceImpl(AuthenticationManager authenticationManager, TokenProvider tokenProvider) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 6566)
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 6567)
                 .usePlaintext()
                 .build();
 
-        userServiceBlockingStub = UserServiceGrpc.newBlockingStub(channel);
+        authServiceBlockingStub = AuthServiceGrpc.newBlockingStub(channel);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         try {
-            SignUpResponse signUpResponse = userServiceBlockingStub.signUp(signUpRequest);
+            SignUpResponse signUpResponse = authServiceBlockingStub.signUp(signUpRequest);
             SignUpResponseDTO response = new SignUpResponseDTO(HttpResponseStatus.CREATED.toString(), signUpResponse.getMessage());
             logger.info("Usuário registrado com sucesso!");
             return ResponseEntity.ok(response);
