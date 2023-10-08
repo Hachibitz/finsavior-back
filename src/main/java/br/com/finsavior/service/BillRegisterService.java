@@ -9,4 +9,5 @@ import org.springframework.stereotype.Service;
 public interface BillRegisterService {
 
     ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO);
+    ResponseEntity<?> loadMainTableData();
 }

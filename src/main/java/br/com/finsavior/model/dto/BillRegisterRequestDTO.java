@@ -1,6 +1,7 @@
 package br.com.finsavior.model.dto;
 
 public class BillRegisterRequestDTO {
+    private long userId;
     private String billType;
     private String billDate;
     private String billName;
@@ -9,6 +10,14 @@ public class BillRegisterRequestDTO {
     private String billTable;
 
     public BillRegisterRequestDTO() {
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     public String getBillType() {

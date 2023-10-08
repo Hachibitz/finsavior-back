@@ -9,18 +9,51 @@ message BillRegisterResponse {
 }
 
 message BillRegisterRequest {
-  string billType = 1;
-  string billDate = 2;
-  string billName = 3;
-  double billValue = 4;
-  string billDescription = 5;
-  string billTable = 6;
+  int64 userId = 1;
+  string billType = 2;
+  string billDate = 3;
+  string billName = 4;
+  double billValue = 5;
+  string billDescription = 6;
+  string billTable = 7;
 }
 
-service MainService {
-  rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
+message MainTableDataRequest {
+  int64 userId = 1;
 }
 
-service CardService {
+message MainTableDataResponse {
+  repeated MainTableData mainTableData = 1;
+}
+
+message MainTableData {
+  int64 id = 1;
+  string billType = 2;
+  string billDate = 3;
+  string billName = 4;
+  double billValue = 5;
+  string billDescription = 6;
+}
+
+message CardTableDataRequest {
+  int64 userId = 1;
+}
+
+message CardTableDataResponse {
+  repeated CardTableData cardTableData = 1;
+}
+
+message CardTableData {
+  int64 id = 1;
+  string billType = 2;
+  string billDate = 3;
+  string billName = 4;
+  double billValue = 5;
+  string billDescription = 6;
+}
+
+service TableDataService {
   rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
+  rpc loadMainTableData(MainTableDataRequest) returns (MainTableDataResponse);
+  rpc loadCardTableData(CardTableDataRequest) returns (CardTableDataResponse);
 }

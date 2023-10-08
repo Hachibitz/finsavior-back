@@ -10,6 +10,9 @@ public class MainTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id")
+    private Long user_id;
+
     @Column(name = "bill_type")
     private String billType;
 
@@ -34,6 +37,14 @@ public class MainTable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(Long user_id) {
+        this.user_id = user_id;
     }
 
     public String getBillType() {
