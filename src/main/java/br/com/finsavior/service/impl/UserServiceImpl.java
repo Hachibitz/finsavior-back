@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         DeleteAccountRequest message = DeleteAccountRequest.newBuilder()
                 .setUsername(deleteAccountRequestDTO.getUsername())
                 .setPassword(deleteAccountRequestDTO.getPassword())
-                .setConfirmation(deleteAccountRequestDTO.isConfirmationAccepted())
+                .setConfirmation(deleteAccountRequestDTO.isConfirmation())
                 .build();
 
         try {
