@@ -2,8 +2,7 @@ package br.com.finsavior.controller;
 
 import br.com.finsavior.model.dto.BillRegisterRequestDTO;
 import br.com.finsavior.model.dto.BillRegisterResponseDTO;
-import br.com.finsavior.model.dto.MainTableDataResponseDTO;
-import br.com.finsavior.service.BillRegisterService;
+import br.com.finsavior.service.BillsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,10 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("bills")
-public class BillRegisterController {
+public class BillsController {
 
     @Autowired
-    BillRegisterService service;
+    BillsService service;
 
     @PostMapping("/bill-register")
     @PreAuthorize("hasRole('USER')")

@@ -7,7 +7,7 @@ import br.com.finsavior.model.dto.MainTableDataResponseDTO;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.MainTableRepository;
 import br.com.finsavior.repository.UserRepository;
-import br.com.finsavior.service.BillRegisterService;
+import br.com.finsavior.service.BillsService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
@@ -22,7 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BillRegisterServiceImpl implements BillRegisterService {
+public class BillsServiceImpl implements BillsService {
 
     @Autowired
     MainTableRepository repository;
@@ -35,7 +35,7 @@ public class BillRegisterServiceImpl implements BillRegisterService {
 
     private final TableDataServiceGrpc.TableDataServiceBlockingStub tableDataServiceBlockingStub;
 
-    public BillRegisterServiceImpl() {
+    public BillsServiceImpl() {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 6565)
                 .usePlaintext()
                 .build();
@@ -43,7 +43,7 @@ public class BillRegisterServiceImpl implements BillRegisterService {
         tableDataServiceBlockingStub = TableDataServiceGrpc.newBlockingStub(channel);
     }
 
-    Logger logger = LoggerFactory.getLogger(BillRegisterServiceImpl.class);
+    Logger logger = LoggerFactory.getLogger(BillsServiceImpl.class);
 
     @Override
     public ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO) {
