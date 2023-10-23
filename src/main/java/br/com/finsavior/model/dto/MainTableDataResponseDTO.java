@@ -1,6 +1,6 @@
 package br.com.finsavior.model.dto;
 
-import br.com.finsavior.grpc.maintable.MainTableData;
+import br.com.finsavior.grpc.tables.MainTableData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

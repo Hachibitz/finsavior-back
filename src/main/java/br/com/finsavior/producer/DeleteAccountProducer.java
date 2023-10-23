@@ -1,9 +1,6 @@
 package br.com.finsavior.producer;
 
-import br.com.finsavior.grpc.maintable.MainTable;
 import br.com.finsavior.grpc.user.DeleteAccountRequest;
-import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

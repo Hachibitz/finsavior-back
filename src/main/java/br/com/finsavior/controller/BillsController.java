@@ -21,9 +21,15 @@ public class BillsController {
         return service.billRegister(billRegisterRequestDTO);
     }
 
-    @GetMapping("/load-table-data")
+    @GetMapping("/load-main-table-data")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> billRegister() {
+    public ResponseEntity<?> loadMainTableData() {
         return service.loadMainTableData();
+    }
+
+    @GetMapping("/load-card-table-data")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> loadCardTableData() {
+        return service.loadCardTableData();
     }
 }

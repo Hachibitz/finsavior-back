@@ -1,8 +1,9 @@
 package br.com.finsavior.service.impl;
 
-import br.com.finsavior.grpc.maintable.*;
+import br.com.finsavior.grpc.tables.*;
 import br.com.finsavior.model.dto.BillRegisterRequestDTO;
 import br.com.finsavior.model.dto.BillRegisterResponseDTO;
+import br.com.finsavior.model.dto.CardTableDataResponseDTO;
 import br.com.finsavior.model.dto.MainTableDataResponseDTO;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.MainTableRepository;
@@ -49,18 +50,20 @@ public class BillsServiceImpl implements BillsService {
     public ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
+        String billType = billRegisterRequestDTO.getBillType() == null ? "" : billRegisterRequestDTO.getBillType();
 
-        BillRegisterRequest mainTableRequestDTO = BillRegisterRequest.newBuilder()
+        BillRegisterRequest dataRegisterRequest = BillRegisterRequest.newBuilder()
                 .setUserId(user.getId())
-                .setBillType(billRegisterRequestDTO.getBillType())
+                .setBillType(billType)
                 .setBillDate(billRegisterRequestDTO.getBillDate())
                 .setBillDescription(billRegisterRequestDTO.getBillDescription())
                 .setBillName(billRegisterRequestDTO.getBillName())
                 .setBillValue(billRegisterRequestDTO.getBillValue())
+                .setBillTable(billRegisterRequestDTO.getBillTable())
                 .build();
 
         try {
-            BillRegisterResponse billRegisterResponse = tableDataServiceBlockingStub.billRegister(mainTableRequestDTO);
+            BillRegisterResponse billRegisterResponse = tableDataServiceBlockingStub.billRegister(dataRegisterRequest);
             BillRegisterResponseDTO response = new BillRegisterResponseDTO(billRegisterResponse.getStatus(), billRegisterResponse.getMessage());
             logger.info("Registro de tabela principal salvo.");
             return ResponseEntity.ok(response);
@@ -89,6 +92,27 @@ public class BillsServiceImpl implements BillsService {
             logger.error("Falha ao carregar dados da tabela principal: "+e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Falha ao carregar dados da tabela principal: "+e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> loadCardTableData() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+
+        CardTableDataRequest cardTableDataRequest = CardTableDataRequest.newBuilder()
+                .setUserId(user.getId())
+                .build();
+        ModelMapper modelMapper = new ModelMapper();
+
+        try {
+            CardTableDataResponse cardTableDataResponse = tableDataServiceBlockingStub.loadCardTableData(cardTableDataRequest);
+            CardTableDataResponseDTO response = modelMapper.map(cardTableDataResponse, CardTableDataResponseDTO.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Falha ao carregar dados da tabela de cartão de crédito: "+e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Falha ao carregar dados da tabela de cartão de crédito: "+e.getMessage());
         }
     }
 }

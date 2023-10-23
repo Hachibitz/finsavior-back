@@ -1,14 +1,15 @@
 package br.com.finsavior.model.dto;
 
-import br.com.finsavior.grpc.tables.BillRegisterRequest;
+import br.com.finsavior.grpc.tables.CardTableData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BillRegisterResponseDTO {
-    private String status;
-    private BillRegisterRequest message;
+public class CardTableDataResponseDTO {
+    private List<CardTableData> cardTableDataList;
 }

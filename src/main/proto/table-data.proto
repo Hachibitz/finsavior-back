@@ -1,6 +1,6 @@
 syntax="proto3";
 
-option java_package = "br.com.finsavior.grpc.maintable";
+option java_package = "br.com.finsavior.grpc.tables";
 option java_multiple_files = true;
 
 message BillRegisterResponse {
@@ -45,11 +45,10 @@ message CardTableDataResponse {
 
 message CardTableData {
   int64 id = 1;
-  string billType = 2;
-  string billDate = 3;
-  string billName = 4;
-  double billValue = 5;
-  string billDescription = 6;
+  string billDate = 2;
+  string billName = 3;
+  double billValue = 4;
+  string billDescription = 5;
 }
 
 service TableDataService {

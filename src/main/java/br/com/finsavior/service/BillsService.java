@@ -10,4 +10,6 @@ public interface BillsService {
 
     ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO);
     ResponseEntity<?> loadMainTableData();
+
+    public ResponseEntity<?> loadCardTableData();
 }
