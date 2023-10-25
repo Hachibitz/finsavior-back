@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class BillRegisterRequestDTO {
+    private long id;
     private long userId;
     private String billType;
     private String billDate;

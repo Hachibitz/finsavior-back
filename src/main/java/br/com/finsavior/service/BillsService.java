@@ -14,4 +14,7 @@ public interface BillsService {
     public ResponseEntity<?> loadCardTableData();
     public ResponseEntity<GenericResponseDTO> deleteItemFromMainTable(Long itemId);
     public ResponseEntity<GenericResponseDTO> deleteItemFromCardTable(Long itemId);
+
+    public ResponseEntity<GenericResponseDTO> editItemFromMainTable(BillRegisterRequestDTO billRegisterRequestDTO);
+    public ResponseEntity<GenericResponseDTO> editItemFromCardTable(BillRegisterRequestDTO billRegisterRequestDTO);
 }

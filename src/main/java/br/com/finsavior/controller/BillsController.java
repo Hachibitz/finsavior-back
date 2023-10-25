@@ -45,4 +45,16 @@ public class BillsController {
     public ResponseEntity<GenericResponseDTO> deleteItemFromCardTable(@RequestParam Long itemId) {
         return service.deleteItemFromCardTable(itemId);
     }
+
+    @PutMapping("/edit-item-table-card")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<GenericResponseDTO> editItemFromCardTable(@RequestBody BillRegisterRequestDTO billRegisterRequestDTO) {
+        return service.editItemFromCardTable(billRegisterRequestDTO);
+    }
+
+    @PutMapping("/edit-item-table-main")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<GenericResponseDTO> editItemFromMainTable(@RequestBody BillRegisterRequestDTO billRegisterRequestDTO) {
+        return service.editItemFromMainTable(billRegisterRequestDTO);
+    }
 }

@@ -146,4 +146,67 @@ public class BillsServiceImpl implements BillsService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @Override
+    public ResponseEntity<GenericResponseDTO> editItemFromMainTable(BillRegisterRequestDTO billRegisterRequestDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+
+        BillRegisterRequest billRegisterRequest = BillRegisterRequest.newBuilder()
+                .setBillDate(billRegisterRequestDTO.getBillDate())
+                .setBillDescription(billRegisterRequestDTO.getBillDescription())
+                .setBillTable(billRegisterRequestDTO.getBillTable())
+                .setBillName(billRegisterRequestDTO.getBillName())
+                .setBillType(billRegisterRequestDTO.getBillType())
+                .setBillValue(billRegisterRequestDTO.getBillValue())
+                .setUserId(user.getId())
+                .build();
+
+        BillUpdateRequest billUpdateRequest = BillUpdateRequest.newBuilder()
+                .setBill(billRegisterRequest)
+                .setId(billRegisterRequestDTO.getId())
+                .build();
+
+        try {
+            GenericResponse genericResponse = tableDataServiceBlockingStub.editItemFromMainTable(billUpdateRequest);
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Falha ao editar item da tabela principal: "+e.getMessage());
+            e.printStackTrace();
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao editar item da tabela principal: "+e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @Override
+    public ResponseEntity<GenericResponseDTO> editItemFromCardTable(BillRegisterRequestDTO billRegisterRequestDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+
+        BillRegisterRequest billRegisterRequest = BillRegisterRequest.newBuilder()
+                .setBillDate(billRegisterRequestDTO.getBillDate())
+                .setBillDescription(billRegisterRequestDTO.getBillDescription())
+                .setBillTable(billRegisterRequestDTO.getBillTable())
+                .setBillName(billRegisterRequestDTO.getBillName())
+                .setBillValue(billRegisterRequestDTO.getBillValue())
+                .setUserId(user.getId())
+                .build();
+
+        BillUpdateRequest billUpdateRequest = BillUpdateRequest.newBuilder()
+                .setBill(billRegisterRequest)
+                .setId(billRegisterRequestDTO.getId())
+                .build();
+
+        try {
+            GenericResponse genericResponse = tableDataServiceBlockingStub.editItemFromCardTable(billUpdateRequest);
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Falha ao editar item da tabela de detalhamento de cartões: "+e.getMessage());
+            e.printStackTrace();
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao editar item da tabela de detalhamento de cartões: "+e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }
