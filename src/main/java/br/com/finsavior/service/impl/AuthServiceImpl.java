@@ -3,10 +3,9 @@ package br.com.finsavior.service.impl;
 import br.com.finsavior.grpc.security.AuthServiceGrpc;
 import br.com.finsavior.grpc.security.SignUpRequest;
 import br.com.finsavior.grpc.security.SignUpResponse;
-import br.com.finsavior.grpc.user.UserServiceGrpc;
 import br.com.finsavior.model.dto.LoginRequestDTO;
 import br.com.finsavior.model.dto.SignUpRequestDTO;
-import br.com.finsavior.model.dto.SignUpResponseDTO;
+import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.security.TokenProvider;
 import br.com.finsavior.service.AuthService;
 import io.grpc.ManagedChannel;
@@ -82,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<SignUpResponseDTO> signUp(SignUpRequestDTO signUpRequestDTO) {
+    public ResponseEntity<GenericResponseDTO> signUp(SignUpRequestDTO signUpRequestDTO) {
         SignUpRequest signUpRequest = SignUpRequest.newBuilder()
                 .setEmail(signUpRequestDTO.getEmail())
                 .setUsername(signUpRequestDTO.getUsername())
@@ -93,12 +92,12 @@ public class AuthServiceImpl implements AuthService {
 
         try {
             SignUpResponse signUpResponse = authServiceBlockingStub.signUp(signUpRequest);
-            SignUpResponseDTO response = new SignUpResponseDTO(HttpResponseStatus.CREATED.toString(), signUpResponse.getMessage());
+            GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.CREATED.toString(), signUpResponse.getMessage());
             logger.info("Usuário registrado com sucesso!");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error(e.getMessage());
-            SignUpResponseDTO response = new SignUpResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), "Falha no registro");
+            GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), "Falha no registro");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

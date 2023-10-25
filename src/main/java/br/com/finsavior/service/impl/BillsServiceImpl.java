@@ -1,10 +1,7 @@
 package br.com.finsavior.service.impl;
 
 import br.com.finsavior.grpc.tables.*;
-import br.com.finsavior.model.dto.BillRegisterRequestDTO;
-import br.com.finsavior.model.dto.BillRegisterResponseDTO;
-import br.com.finsavior.model.dto.CardTableDataResponseDTO;
-import br.com.finsavior.model.dto.MainTableDataResponseDTO;
+import br.com.finsavior.model.dto.*;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.MainTableRepository;
 import br.com.finsavior.repository.UserRepository;
@@ -113,6 +110,40 @@ public class BillsServiceImpl implements BillsService {
             logger.error("Falha ao carregar dados da tabela de cartão de crédito: "+e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Falha ao carregar dados da tabela de cartão de crédito: "+e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<GenericResponseDTO> deleteItemFromMainTable(Long itemId) {
+        DeleteItemFromTableRequest deleteItemFromTableRequest = DeleteItemFromTableRequest.newBuilder()
+                .setId(itemId)
+                .build();
+        try {
+            GenericResponse genericResponse = tableDataServiceBlockingStub.deleteItemFromMainTable(deleteItemFromTableRequest);
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Falha ao excluir item da base: "+e.getMessage());
+            e.printStackTrace();
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao excluir item da tabela principal da base: "+e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @Override
+    public ResponseEntity<GenericResponseDTO> deleteItemFromCardTable(Long itemId) {
+        DeleteItemFromTableRequest deleteItemFromTableRequest = DeleteItemFromTableRequest.newBuilder()
+                .setId(itemId)
+                .build();
+        try {
+            GenericResponse genericResponse = tableDataServiceBlockingStub.deleteItemFromCardTable(deleteItemFromTableRequest);
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Falha ao excluir item da base: "+e.getMessage());
+            e.printStackTrace();
+            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao excluir item da tabela de cartões da base: "+e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

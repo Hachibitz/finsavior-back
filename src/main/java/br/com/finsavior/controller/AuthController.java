@@ -2,7 +2,7 @@ package br.com.finsavior.controller;
 
 import br.com.finsavior.model.dto.LoginRequestDTO;
 import br.com.finsavior.model.dto.SignUpRequestDTO;
-import br.com.finsavior.model.dto.SignUpResponseDTO;
+import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,7 +18,7 @@ public class AuthController {
     AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignUpResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO) {
+    public ResponseEntity<GenericResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO) {
         return authService.signUp(signUpRequestDTO);
     }
 

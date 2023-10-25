@@ -16,7 +16,7 @@ public class DeleteAccountProducer {
     private final String topicName;
     private final KafkaTemplate<String, DeleteAccountRequest> kafkaTemplate;
 
-    public DeleteAccountProducer(@Value("${topic.name}") String topicName, KafkaTemplate<String, DeleteAccountRequest> kafkaTemplate) {
+    public DeleteAccountProducer(@Value("${delete.account.topic.name}") String topicName, KafkaTemplate<String, DeleteAccountRequest> kafkaTemplate) {
         this.topicName = topicName;
         this.kafkaTemplate = kafkaTemplate;
     }

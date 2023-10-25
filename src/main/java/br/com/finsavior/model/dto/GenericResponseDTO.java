@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class SignUpResponseDTO {
+public class GenericResponseDTO {
 
     private String status;
     private String message;

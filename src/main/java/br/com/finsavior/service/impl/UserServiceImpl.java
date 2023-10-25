@@ -2,22 +2,17 @@ package br.com.finsavior.service.impl;
 
 import br.com.finsavior.grpc.user.*;
 import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
-import br.com.finsavior.model.dto.SignUpRequestDTO;
-import br.com.finsavior.model.dto.SignUpResponseDTO;
 import br.com.finsavior.producer.DeleteAccountProducer;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.UserService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {

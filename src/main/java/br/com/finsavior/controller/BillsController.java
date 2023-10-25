@@ -2,6 +2,7 @@ package br.com.finsavior.controller;
 
 import br.com.finsavior.model.dto.BillRegisterRequestDTO;
 import br.com.finsavior.model.dto.BillRegisterResponseDTO;
+import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.service.BillsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,5 +32,17 @@ public class BillsController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> loadCardTableData() {
         return service.loadCardTableData();
+    }
+
+    @DeleteMapping("/delete-item-table-main")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<GenericResponseDTO> deleteItemFromMainTable(@RequestParam Long itemId) {
+        return service.deleteItemFromMainTable(itemId);
+    }
+
+    @DeleteMapping("/delete-item-table-card")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<GenericResponseDTO> deleteItemFromCardTable(@RequestParam Long itemId) {
+        return service.deleteItemFromCardTable(itemId);
     }
 }

@@ -51,8 +51,18 @@ message CardTableData {
   string billDescription = 5;
 }
 
+message DeleteItemFromTableRequest {
+  int64 id = 1;
+}
+
+message GenericResponse {
+  string message = 1;
+}
+
 service TableDataService {
   rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
   rpc loadMainTableData(MainTableDataRequest) returns (MainTableDataResponse);
   rpc loadCardTableData(CardTableDataRequest) returns (CardTableDataResponse);
+  rpc deleteItemFromMainTable(DeleteItemFromTableRequest) returns (GenericResponse);
+  rpc deleteItemFromCardTable(DeleteItemFromTableRequest) returns (GenericResponse);
 }
