@@ -16,6 +16,7 @@ message BillRegisterRequest {
   double billValue = 5;
   string billDescription = 6;
   string billTable = 7;
+  bool isRecurrent = 8;
 }
 
 message MainTableDataRequest {

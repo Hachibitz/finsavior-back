@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface BillsService {
 
-    ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO);
+    ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO, boolean isRecurrent);
     ResponseEntity<?> loadMainTableData(String billDate);
     public ResponseEntity<?> loadCardTableData(String billDate);
     public ResponseEntity<GenericResponseDTO> deleteItemFromMainTable(Long itemId);

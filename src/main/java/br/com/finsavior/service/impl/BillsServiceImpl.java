@@ -44,7 +44,7 @@ public class BillsServiceImpl implements BillsService {
     Logger logger = LoggerFactory.getLogger(BillsServiceImpl.class);
 
     @Override
-    public ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO) {
+    public ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO, boolean isRecurrent) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
         String billType = billRegisterRequestDTO.getBillType() == null ? "" : billRegisterRequestDTO.getBillType();
@@ -57,6 +57,7 @@ public class BillsServiceImpl implements BillsService {
                 .setBillName(billRegisterRequestDTO.getBillName())
                 .setBillValue(billRegisterRequestDTO.getBillValue())
                 .setBillTable(billRegisterRequestDTO.getBillTable())
+                .setIsRecurrent(isRecurrent)
                 .build();
 
         try {
@@ -162,6 +163,7 @@ public class BillsServiceImpl implements BillsService {
                 .setBillType(billRegisterRequestDTO.getBillType())
                 .setBillValue(billRegisterRequestDTO.getBillValue())
                 .setUserId(user.getId())
+                .setIsRecurrent(false)
                 .build();
 
         BillUpdateRequest billUpdateRequest = BillUpdateRequest.newBuilder()
@@ -193,6 +195,7 @@ public class BillsServiceImpl implements BillsService {
                 .setBillName(billRegisterRequestDTO.getBillName())
                 .setBillValue(billRegisterRequestDTO.getBillValue())
                 .setUserId(user.getId())
+                .setIsRecurrent(false)
                 .build();
 
         BillUpdateRequest billUpdateRequest = BillUpdateRequest.newBuilder()

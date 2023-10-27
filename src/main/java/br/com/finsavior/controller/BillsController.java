@@ -18,8 +18,8 @@ public class BillsController {
 
     @PostMapping("/bill-register")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<BillRegisterResponseDTO> billRegister(@RequestBody BillRegisterRequestDTO billRegisterRequestDTO) {
-        return service.billRegister(billRegisterRequestDTO);
+    public ResponseEntity<BillRegisterResponseDTO> billRegister(@RequestBody BillRegisterRequestDTO billRegisterRequestDTO, @RequestParam boolean isRecurrent) {
+        return service.billRegister(billRegisterRequestDTO, isRecurrent);
     }
 
     @GetMapping("/load-main-table-data")
