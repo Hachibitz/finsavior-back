@@ -72,12 +72,13 @@ public class BillsServiceImpl implements BillsService {
     }
 
     @Override
-    public ResponseEntity<?> loadMainTableData() {
+    public ResponseEntity<?> loadMainTableData(String billDate) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
 
         MainTableDataRequest mainTableDataRequest = MainTableDataRequest.newBuilder()
                 .setUserId(user.getId())
+                .setBillDate(billDate)
                 .build();
         ModelMapper modelMapper = new ModelMapper();
 
@@ -93,12 +94,13 @@ public class BillsServiceImpl implements BillsService {
     }
 
     @Override
-    public ResponseEntity<?> loadCardTableData() {
+    public ResponseEntity<?> loadCardTableData(String billDate) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
 
         CardTableDataRequest cardTableDataRequest = CardTableDataRequest.newBuilder()
                 .setUserId(user.getId())
+                .setBillDate(billDate)
                 .build();
         ModelMapper modelMapper = new ModelMapper();
 

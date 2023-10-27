@@ -24,14 +24,14 @@ public class BillsController {
 
     @GetMapping("/load-main-table-data")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> loadMainTableData() {
-        return service.loadMainTableData();
+    public ResponseEntity<?> loadMainTableData(@RequestParam String billDate) {
+        return service.loadMainTableData(billDate);
     }
 
     @GetMapping("/load-card-table-data")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> loadCardTableData() {
-        return service.loadCardTableData();
+    public ResponseEntity<?> loadCardTableData(@RequestParam String billDate) {
+        return service.loadCardTableData(billDate);
     }
 
     @DeleteMapping("/delete-item-table-main")

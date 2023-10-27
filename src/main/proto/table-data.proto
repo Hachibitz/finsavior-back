@@ -20,6 +20,7 @@ message BillRegisterRequest {
 
 message MainTableDataRequest {
   int64 userId = 1;
+  string billDate = 2;
 }
 
 message MainTableDataResponse {
@@ -37,6 +38,7 @@ message MainTableData {
 
 message CardTableDataRequest {
   int64 userId = 1;
+  string billDate = 2;
 }
 
 message CardTableDataResponse {
