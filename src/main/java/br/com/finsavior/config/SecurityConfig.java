@@ -96,6 +96,7 @@ public class SecurityConfig {
             "Cache-Control",
             "Content-Type"
         ));
+		corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
