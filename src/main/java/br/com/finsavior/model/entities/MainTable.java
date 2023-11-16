@@ -1,8 +1,10 @@
 package br.com.finsavior.model.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name = "main_table")
 public class MainTable {
 
@@ -28,62 +30,6 @@ public class MainTable {
     @Column(name = "bill_description")
     private String billDescription;
 
-    public MainTable() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
-    }
-
-    public String getBillType() {
-        return billType;
-    }
-
-    public void setBillType(String billType) {
-        this.billType = billType;
-    }
-
-    public String getBillDate() {
-        return billDate;
-    }
-
-    public void setBillDate(String billDate) {
-        this.billDate = billDate;
-    }
-
-    public String getBillName() {
-        return billName;
-    }
-
-    public void setBillName(String billName) {
-        this.billName = billName;
-    }
-
-    public double getBillValue() {
-        return billValue;
-    }
-
-    public void setBillValue(double billValue) {
-        this.billValue = billValue;
-    }
-
-    public String getBillDescription() {
-        return billDescription;
-    }
-
-    public void setBillDescription(String billDescription) {
-        this.billDescription = billDescription;
-    }
+    @Column(name = "is_paid")
+    private boolean isPaid;
 }

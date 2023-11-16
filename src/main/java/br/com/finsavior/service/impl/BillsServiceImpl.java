@@ -164,6 +164,7 @@ public class BillsServiceImpl implements BillsService {
                 .setBillValue(billRegisterRequestDTO.getBillValue())
                 .setUserId(user.getId())
                 .setIsRecurrent(false)
+                .setIsPaid(billRegisterRequestDTO.isPaid())
                 .build();
 
         BillUpdateRequest billUpdateRequest = BillUpdateRequest.newBuilder()

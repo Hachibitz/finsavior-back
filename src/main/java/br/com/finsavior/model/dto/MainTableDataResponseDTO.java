@@ -1,6 +1,5 @@
 package br.com.finsavior.model.dto;
 
-import br.com.finsavior.grpc.tables.MainTableData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,5 +10,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MainTableDataResponseDTO {
-    private List<MainTableData> mainTableDataList;
+    private List<MainTableDataDTO> mainTableDataList;
 }

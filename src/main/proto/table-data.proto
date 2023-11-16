@@ -17,6 +17,7 @@ message BillRegisterRequest {
   string billDescription = 6;
   string billTable = 7;
   bool isRecurrent = 8;
+  bool isPaid = 9;
 }
 
 message MainTableDataRequest {
@@ -35,6 +36,7 @@ message MainTableData {
   string billName = 4;
   double billValue = 5;
   string billDescription = 6;
+  bool isPaid = 7;
 }
 
 message CardTableDataRequest {
