@@ -1,0 +1,8 @@
+syntax="proto3";
+
+option java_package = "br.com.finsavior.grpc.tables";
+option java_multiple_files = true;
+
+message GenericResponse {
+  string message = 1;
+}

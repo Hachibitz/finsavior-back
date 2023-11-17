@@ -1,5 +1,7 @@
 syntax="proto3";
 
+import "common.proto";
+
 option java_package = "br.com.finsavior.grpc.tables";
 option java_multiple_files = true;
 
@@ -63,10 +65,6 @@ message DeleteItemFromTableRequest {
 message BillUpdateRequest {
   int64 id = 1;
   BillRegisterRequest bill = 2;
-}
-
-message GenericResponse {
-  string message = 1;
 }
 
 service TableDataService {

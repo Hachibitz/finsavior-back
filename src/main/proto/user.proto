@@ -1,5 +1,7 @@
 syntax="proto3";
 
+import "common.proto";
+
 option java_package = "br.com.finsavior.grpc.user";
 option java_multiple_files = true;
 
@@ -13,6 +15,13 @@ message DeleteAccountResponse {
   string message = 1;
 }
 
+message ChangePasswordRequest {
+  string username = 1;
+  string currentPassword = 2;
+  string newPassword = 3;
+}
+
 service UserService {
   rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+  rpc ChangeAccountPassword(ChangePasswordRequest) returns (GenericResponse);
 }

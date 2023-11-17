@@ -1,5 +1,6 @@
 package br.com.finsavior.controller;
 
+import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
 import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
 import br.com.finsavior.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,12 @@ public class UserController {
     public ResponseEntity<?> deleteAccountAndData(@RequestBody DeleteAccountRequestDTO deleteAccountRequest) {
         return userService.deleteAccount(deleteAccountRequest);
     }
-    
+
+    @PostMapping("/change-password")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeAccountPassword(@RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
+        return userService.changeAccountPassword(changePasswordRequestDTO);
+    }
     @GetMapping("/teste-autorizacao")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public String testeAutorizacao() {
