@@ -53,12 +53,15 @@ public class AuthServiceImpl implements AuthService {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String token = tokenProvider.generateToken(authentication);
+            String token = tokenProvider.generateToken(authentication, loginRequest.isRememberMe());
             Cookie tokenCookie = new Cookie("token", token);
 
             tokenCookie.setDomain(request.getServerName());
             tokenCookie.setPath("/");
             tokenCookie.setMaxAge(120*60); //120 minutos
+            if(loginRequest.isRememberMe()) {
+                tokenCookie.setMaxAge(43800*60); //1 mês
+            }
             response.addCookie(tokenCookie);
 
             log.info("Autenticado com sucesso!");

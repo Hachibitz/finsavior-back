@@ -19,15 +19,22 @@ public class TokenProvider {
 
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
+
+    @Value("${app.jwtExpirationMsForRememberMe}")
+    private Long jwtExpirationMsForRememberMe;
     
     @Autowired
     UserSecurityDetails userSecurityDetails;
 
-    public String generateToken(Authentication authentication) {
+    public String generateToken(Authentication authentication, boolean rememberMe) {
         CustomUserDetails customUserDetails = (CustomUserDetails) userSecurityDetails.loadUserByUsername(authentication.getPrincipal().toString());
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+
+        if (rememberMe) {
+            expiryDate = new Date(now.getTime() + jwtExpirationMsForRememberMe);
+        }
 
         return Jwts.builder()
         		.claim("username", customUserDetails.getUsername())
