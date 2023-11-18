@@ -10,6 +10,7 @@ import br.com.finsavior.security.TokenProvider;
 import br.com.finsavior.service.AuthService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -83,12 +84,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<GenericResponseDTO> signUp(SignUpRequestDTO signUpRequestDTO) {
+        if(!signUpRequestDTO.isAgreement()) {
+            GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), "Termos não aceitos.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
         SignUpRequest signUpRequest = SignUpRequest.newBuilder()
                 .setEmail(signUpRequestDTO.getEmail())
                 .setUsername(signUpRequestDTO.getUsername())
                 .setFirstName(signUpRequestDTO.getFirstName())
                 .setLastName(signUpRequestDTO.getLastName())
                 .setPassword(signUpRequestDTO.getPassword())
+                .setPasswordConfirmation(signUpRequestDTO.getPasswordConfirmation())
                 .build();
 
         try {
@@ -96,9 +103,9 @@ public class AuthServiceImpl implements AuthService {
             GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.CREATED.toString(), signUpResponse.getMessage());
             log.info("Usuário registrado com sucesso!");
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (StatusRuntimeException e) {
             log.error(e.getMessage());
-            GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), "Falha no registro");
+            GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), "Falha no registro: "+e.getStatus().getDescription());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

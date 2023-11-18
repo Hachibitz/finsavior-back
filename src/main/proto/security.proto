@@ -9,6 +9,7 @@ message SignUpRequest {
   string firstName = 3;
   string lastName = 4;
   string password = 5;
+  string passwordConfirmation = 6;
 }
 
 message SignUpResponse {
