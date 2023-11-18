@@ -8,6 +8,7 @@ import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.BillsService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -65,8 +66,8 @@ public class BillsServiceImpl implements BillsService {
             BillRegisterResponseDTO response = new BillRegisterResponseDTO(billRegisterResponse.getStatus(), billRegisterResponse.getMessage());
             logger.info("Registro de tabela principal salvo.");
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.info(e.getMessage());
+        } catch (StatusRuntimeException e) {
+            logger.error(e.getStatus().getDescription());
             BillRegisterResponseDTO response = new BillRegisterResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

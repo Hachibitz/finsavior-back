@@ -50,6 +50,9 @@ public class UserServiceImpl implements UserService {
             deleteAccountProducer.sendMessage(message);
             log.info("Exclusão do usuário "+deleteAccountRequestDTO.getUsername()+" enviada para a fila com sucesso.");
             return ResponseEntity.ok("Conta adicionada na fila de exclusão com sucesso. Exclusão será processada nas próximas horas junto com todos os dados da conta.");
+        } catch (StatusRuntimeException e) {
+            log.error("Erro na exclusão, tente novamente em alguns minutos."+e.getStatus().getDescription());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro na exclusão: "+e.getStatus().getDescription());
         } catch (Exception e) {
             log.error("Erro na exclusão, tente novamente em alguns minutos."+e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro na exclusão, tente novamente em alguns minutos.");
