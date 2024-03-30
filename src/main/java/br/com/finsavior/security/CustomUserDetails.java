@@ -44,7 +44,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-    	return !user.isDel_fg();
+    	return !user.isDelFg();
     }
 
     @Override

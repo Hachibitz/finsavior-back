@@ -11,8 +11,10 @@ import br.com.finsavior.service.UserService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,15 +25,23 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    DeleteAccountProducer deleteAccountProducer;
+    private final UserRepository userRepository;
+    private final DeleteAccountProducer deleteAccountProducer;
+    private final Environment environment;
 
-    private final UserServiceGrpc.UserServiceBlockingStub userServiceBlockingStub;
+    private UserServiceGrpc.UserServiceBlockingStub userServiceBlockingStub;
 
-    public UserServiceImpl() {
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 6566)
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment) {
+        this.userRepository = userRepository;
+        this.deleteAccountProducer = deleteAccountProducer;
+        this.environment = environment;
+    }
+
+    @PostConstruct
+    public void initialize() {
+        String userServiceHost = environment.getProperty("finsavior.user.service.host");
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(userServiceHost, 6566)
                 .usePlaintext()
                 .build();
 

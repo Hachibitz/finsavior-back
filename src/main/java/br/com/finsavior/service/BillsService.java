@@ -1,5 +1,6 @@
 package br.com.finsavior.service;
 
+import br.com.finsavior.model.dto.AiAdviceDTO;
 import br.com.finsavior.model.dto.BillRegisterRequestDTO;
 import br.com.finsavior.model.dto.BillRegisterResponseDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
@@ -14,7 +15,6 @@ public interface BillsService {
     public ResponseEntity<?> loadCardTableData(String billDate);
     public ResponseEntity<GenericResponseDTO> deleteItemFromMainTable(Long itemId);
     public ResponseEntity<GenericResponseDTO> deleteItemFromCardTable(Long itemId);
-
     public ResponseEntity<GenericResponseDTO> editItemFromMainTable(BillRegisterRequestDTO billRegisterRequestDTO);
     public ResponseEntity<GenericResponseDTO> editItemFromCardTable(BillRegisterRequestDTO billRegisterRequestDTO);
 }

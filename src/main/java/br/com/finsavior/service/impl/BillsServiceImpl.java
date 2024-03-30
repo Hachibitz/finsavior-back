@@ -3,17 +3,17 @@ package br.com.finsavior.service.impl;
 import br.com.finsavior.grpc.tables.*;
 import br.com.finsavior.model.dto.*;
 import br.com.finsavior.model.entities.User;
-import br.com.finsavior.repository.MainTableRepository;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.BillsService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,28 +21,32 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class BillsServiceImpl implements BillsService {
 
-    @Autowired
-    MainTableRepository repository;
-
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final Environment environment;
 
     //@GrpcClient("main-table-service")
     //MainServiceGrpc.MainServiceBlockingStub mainServiceBlockingStub;
 
-    private final TableDataServiceGrpc.TableDataServiceBlockingStub tableDataServiceBlockingStub;
+    private TableDataServiceGrpc.TableDataServiceBlockingStub tableDataServiceBlockingStub;
 
-    public BillsServiceImpl() {
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 6565)
+    @Autowired
+    public BillsServiceImpl(UserRepository userRepository, Environment environment) {
+        this.userRepository = userRepository;
+        this.environment = environment;
+    }
+
+    @PostConstruct
+    public void initialize() {
+        String tableServiceHost = environment.getProperty("finsavior.table.service.host");
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(tableServiceHost, 6565)
                 .usePlaintext()
                 .build();
 
         tableDataServiceBlockingStub = TableDataServiceGrpc.newBlockingStub(channel);
     }
-
-    Logger logger = LoggerFactory.getLogger(BillsServiceImpl.class);
 
     @Override
     public ResponseEntity<BillRegisterResponseDTO> billRegister(BillRegisterRequestDTO billRegisterRequestDTO, boolean isRecurrent) {
@@ -64,10 +68,10 @@ public class BillsServiceImpl implements BillsService {
         try {
             BillRegisterResponse billRegisterResponse = tableDataServiceBlockingStub.billRegister(dataRegisterRequest);
             BillRegisterResponseDTO response = new BillRegisterResponseDTO(billRegisterResponse.getStatus(), billRegisterResponse.getMessage());
-            logger.info("Registro de tabela principal salvo.");
+            log.info("Registro de tabela principal salvo.");
             return ResponseEntity.ok(response);
         } catch (StatusRuntimeException e) {
-            logger.error(e.getStatus().getDescription());
+            log.error(e.getStatus().getDescription());
             BillRegisterResponseDTO response = new BillRegisterResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -89,7 +93,7 @@ public class BillsServiceImpl implements BillsService {
             MainTableDataResponseDTO response = modelMapper.map(mainTableDataResponse, MainTableDataResponseDTO.class);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Falha ao carregar dados da tabela principal: "+e.getMessage());
+            log.error("Falha ao carregar dados da tabela principal: "+e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Falha ao carregar dados da tabela principal: "+e.getMessage());
         }
@@ -111,7 +115,7 @@ public class BillsServiceImpl implements BillsService {
             CardTableDataResponseDTO response = modelMapper.map(cardTableDataResponse, CardTableDataResponseDTO.class);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Falha ao carregar dados da tabela de cartão de crédito: "+e.getMessage());
+            log.error("Falha ao carregar dados da tabela de cartão de crédito: "+e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Falha ao carregar dados da tabela de cartão de crédito: "+e.getMessage());
         }
@@ -127,7 +131,7 @@ public class BillsServiceImpl implements BillsService {
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Falha ao excluir item da base: "+e.getMessage());
+            log.error("Falha ao excluir item da base: "+e.getMessage());
             e.printStackTrace();
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao excluir item da tabela principal da base: "+e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -144,7 +148,7 @@ public class BillsServiceImpl implements BillsService {
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Falha ao excluir item da base: "+e.getMessage());
+            log.error("Falha ao excluir item da base: "+e.getMessage());
             e.printStackTrace();
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao excluir item da tabela de cartões da base: "+e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -178,7 +182,7 @@ public class BillsServiceImpl implements BillsService {
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Falha ao editar item da tabela principal: "+e.getMessage());
+            log.error("Falha ao editar item da tabela principal: "+e.getMessage());
             e.printStackTrace();
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao editar item da tabela principal: "+e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -210,7 +214,7 @@ public class BillsServiceImpl implements BillsService {
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Falha ao editar item da tabela de detalhamento de cartões: "+e.getMessage());
+            log.error("Falha ao editar item da tabela de detalhamento de cartões: "+e.getMessage());
             e.printStackTrace();
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao editar item da tabela de detalhamento de cartões: "+e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

@@ -9,10 +9,11 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.com.finsavior</groupId>
-	<artifactId>finsavior</artifactId>
+	<artifactId>finsavior-back</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>finsavior</name>
 	<description>FinSavior Project</description>
+	<packaging>jar</packaging>
 	<properties>
 		<java.version>17</java.version>
 		<grpc.java.version>1.57.2</grpc.java.version>

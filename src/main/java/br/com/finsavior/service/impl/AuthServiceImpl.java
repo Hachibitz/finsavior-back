@@ -12,10 +12,12 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,14 +33,20 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
+    private final Environment environment;
 
-    private final AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub;
+    private AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub;
 
-    public AuthServiceImpl(AuthenticationManager authenticationManager, TokenProvider tokenProvider) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager, TokenProvider tokenProvider, Environment environment) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
+        this.environment = environment;
+    }
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 6567)
+    @PostConstruct
+    public void initialize() {
+        String securityServiceHost = environment.getProperty("finsavior.security.service.host");
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(securityServiceHost, 6567)
                 .usePlaintext()
                 .build();
 
