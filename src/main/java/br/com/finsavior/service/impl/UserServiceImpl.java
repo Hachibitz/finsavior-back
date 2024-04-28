@@ -4,6 +4,7 @@ import br.com.finsavior.grpc.tables.GenericResponse;
 import br.com.finsavior.grpc.user.*;
 import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
 import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
+import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.producer.DeleteAccountProducer;
 import br.com.finsavior.repository.UserRepository;
@@ -57,9 +58,10 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         try {
+            GenericResponseDTO genericResponseDTO = new GenericResponseDTO(HttpStatus.OK.name(), "Conta adicionada na fila de exclusão com sucesso. Exclusão será processada nas próximas horas junto com todos os dados da conta.");
             deleteAccountProducer.sendMessage(message);
             log.info("Exclusão do usuário "+deleteAccountRequestDTO.getUsername()+" enviada para a fila com sucesso.");
-            return ResponseEntity.ok("Conta adicionada na fila de exclusão com sucesso. Exclusão será processada nas próximas horas junto com todos os dados da conta.");
+            return ResponseEntity.ok(genericResponseDTO);
         } catch (StatusRuntimeException e) {
             log.error("Erro na exclusão, tente novamente em alguns minutos."+e.getStatus().getDescription());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro na exclusão: "+e.getStatus().getDescription());

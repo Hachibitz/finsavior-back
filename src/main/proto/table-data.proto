@@ -74,6 +74,10 @@ message AiAdviceRequest {
   int32 accountTypeId = 4;
 }
 
+message DeleteAllDataRequest {
+  int64 userId = 1;
+}
+
 service TableDataService {
   rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
   rpc loadMainTableData(MainTableDataRequest) returns (MainTableDataResponse);
@@ -84,4 +88,5 @@ service TableDataService {
   rpc editItemFromCardTable(BillUpdateRequest) returns (GenericResponse);
   rpc generateAiAdviceAndInsights(AiAdviceRequest) returns (GenericResponse);
   rpc getAiAdviceAndInsights(AiAdviceRequest) returns (GenericResponse);
+  rpc deleteAllUserData(DeleteAllDataRequest) returns (GenericResponse);
 }
