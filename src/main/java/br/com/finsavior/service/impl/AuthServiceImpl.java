@@ -1,5 +1,6 @@
 package br.com.finsavior.service.impl;
 
+import br.com.finsavior.exception.AuthTokenException;
 import br.com.finsavior.grpc.security.AuthServiceGrpc;
 import br.com.finsavior.grpc.security.SignUpRequest;
 import br.com.finsavior.grpc.security.SignUpResponse;
@@ -73,21 +74,21 @@ public class AuthServiceImpl implements AuthService {
             }
             response.addCookie(tokenCookie);
 
-            log.info("Autenticado com sucesso!");
+            log.info("class = AuthServiceImpl, method = login, message = Autenticado com sucesso!");
             return ResponseEntity.ok("Autenticado com sucesso!");
         } catch (AuthenticationException e) {
-            log.error("Falha ao autenticar usuário");
+            log.error("class = AuthServiceImpl, method = login");
             throw new RuntimeException("Falha ao autenticar usuário", e);
         }
     }
 
     @Override
     public ResponseEntity<Boolean> validateToken(String token) {
-        log.info("Validando token: "+token);
+        log.info("Validando token: " + token);
         if (token != null && tokenProvider.validateToken(token)){
             return ResponseEntity.ok().body(true);
         }
-        return ResponseEntity.ok().body(false);
+        throw new AuthTokenException("Token não validado!", HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -109,12 +110,12 @@ public class AuthServiceImpl implements AuthService {
         try {
             SignUpResponse signUpResponse = authServiceBlockingStub.signUp(signUpRequest);
             GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.CREATED.toString(), signUpResponse.getMessage());
-            log.info("Usuário registrado com sucesso!");
+            log.info("class = AuthServiceImpl, method = signUp, message = Usuário registrado com sucesso!");
             return ResponseEntity.ok(response);
         } catch (StatusRuntimeException e) {
-            log.error(e.getMessage());
+            log.error("class = AuthServiceImpl, method = signUp, message = {}", e.getMessage());
             GenericResponseDTO response = new GenericResponseDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString(), "Falha no registro: "+e.getStatus().getDescription());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            throw e;
         }
     }
 }

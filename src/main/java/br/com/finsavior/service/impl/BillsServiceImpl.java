@@ -1,7 +1,21 @@
 package br.com.finsavior.service.impl;
 
-import br.com.finsavior.grpc.tables.*;
-import br.com.finsavior.model.dto.*;
+import br.com.finsavior.grpc.tables.TableDataServiceGrpc;
+import br.com.finsavior.grpc.tables.TableDataServiceGrpc.TableDataServiceBlockingStub;
+import br.com.finsavior.grpc.tables.BillRegisterRequest;
+import br.com.finsavior.grpc.tables.BillRegisterResponse;
+import br.com.finsavior.grpc.tables.MainTableDataResponse;
+import br.com.finsavior.grpc.tables.MainTableDataRequest;
+import br.com.finsavior.grpc.tables.CardTableDataRequest;
+import br.com.finsavior.grpc.tables.CardTableDataResponse;
+import br.com.finsavior.grpc.tables.DeleteItemFromTableRequest;
+import br.com.finsavior.grpc.tables.GenericResponse;
+import br.com.finsavior.grpc.tables.BillUpdateRequest;
+import br.com.finsavior.model.dto.BillRegisterRequestDTO;
+import br.com.finsavior.model.dto.BillRegisterResponseDTO;
+import br.com.finsavior.model.dto.CardTableDataResponseDTO;
+import br.com.finsavior.model.dto.GenericResponseDTO;
+import br.com.finsavior.model.dto.MainTableDataResponseDTO;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.BillsService;
@@ -30,7 +44,7 @@ public class BillsServiceImpl implements BillsService {
     //@GrpcClient("main-table-service")
     //MainServiceGrpc.MainServiceBlockingStub mainServiceBlockingStub;
 
-    private TableDataServiceGrpc.TableDataServiceBlockingStub tableDataServiceBlockingStub;
+    private TableDataServiceBlockingStub tableDataServiceBlockingStub;
 
     @Autowired
     public BillsServiceImpl(UserRepository userRepository, Environment environment) {

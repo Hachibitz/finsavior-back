@@ -1,7 +1,12 @@
 package br.com.finsavior.service.impl;
 
+import br.com.finsavior.exception.DeleteUserException;
+import br.com.finsavior.exception.GenericException;
+import br.com.finsavior.grpc.user.UserServiceGrpc;
+import br.com.finsavior.grpc.user.UserServiceGrpc.UserServiceBlockingStub;
+import br.com.finsavior.grpc.user.DeleteAccountRequest;
+import br.com.finsavior.grpc.user.ChangePasswordRequest;
 import br.com.finsavior.grpc.tables.GenericResponse;
-import br.com.finsavior.grpc.user.*;
 import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
 import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
@@ -30,7 +35,7 @@ public class UserServiceImpl implements UserService {
     private final DeleteAccountProducer deleteAccountProducer;
     private final Environment environment;
 
-    private UserServiceGrpc.UserServiceBlockingStub userServiceBlockingStub;
+    private UserServiceBlockingStub userServiceBlockingStub;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment) {
@@ -64,10 +69,10 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok(genericResponseDTO);
         } catch (StatusRuntimeException e) {
             log.error("Erro na exclusão, tente novamente em alguns minutos."+e.getStatus().getDescription());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro na exclusão: "+e.getStatus().getDescription());
+            throw new DeleteUserException("Erro na exclusão: " + e.getStatus().getDescription());
         } catch (Exception e) {
             log.error("Erro na exclusão, tente novamente em alguns minutos."+e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro na exclusão, tente novamente em alguns minutos.");
+            throw new DeleteUserException("Erro na exclusão, tente novamente em alguns minutos.");
         }
     }
 
@@ -87,7 +92,7 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok(response.getMessage());
         } catch (StatusRuntimeException e) {
             log.error("Erro ao realizar alteração de senha: {}", e.getStatus().getDescription());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao realizar alteração de senha: "+e.getStatus().getDescription());
+            throw new GenericException("Erro ao realizar alteração de senha: " + e.getStatus().getDescription(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
