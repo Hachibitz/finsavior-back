@@ -14,7 +14,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @Column(name = "first_name")
+    private String firstName;
+    @Column(name = "last_name")
+    private String lastName;
     private String username;
     private String password;
     private boolean enabled;
@@ -35,4 +39,21 @@ public class User {
 			inverseJoinColumns = @JoinColumn(name = "account_type_id")
 	)
 	private AccountType accountType;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private UserProfile userProfile;
+
+    public String getFirstAndLastName() {
+        String completeName = (this.firstName+this.lastName).trim();
+
+        String[] nameParts = completeName.split("\\s+");
+
+        if (nameParts.length < 2) {
+            return completeName;
+        }
+
+        String singleLastName = nameParts[nameParts.length - 1];
+
+        return this.firstName + " " + singleLastName;
+    }
 }

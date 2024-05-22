@@ -1,14 +1,15 @@
 package br.com.finsavior.model.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class GenericResponseDTO {
-
-    private String status;
-    private String message;
+@AllArgsConstructor
+@Builder
+public class ProfileDataDTO {
+    private String username;
+    private String profilePicture;
 }
