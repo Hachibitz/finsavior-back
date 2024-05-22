@@ -10,8 +10,11 @@ import br.com.finsavior.grpc.tables.GenericResponse;
 import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
 import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
+import br.com.finsavior.model.dto.ProfileDataDTO;
 import br.com.finsavior.model.entities.User;
+import br.com.finsavior.model.entities.UserProfile;
 import br.com.finsavior.producer.DeleteAccountProducer;
+import br.com.finsavior.repository.UserProfileRepository;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.UserService;
 import io.grpc.ManagedChannel;
@@ -26,6 +29,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -34,14 +42,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final DeleteAccountProducer deleteAccountProducer;
     private final Environment environment;
+    private final UserProfileRepository userProfileRepository;
 
     private UserServiceBlockingStub userServiceBlockingStub;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment) {
+    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment, UserProfileRepository userProfileRepository) {
         this.userRepository = userRepository;
         this.deleteAccountProducer = deleteAccountProducer;
         this.environment = environment;
+        this.userProfileRepository = userProfileRepository;
     }
 
     @PostConstruct
@@ -94,5 +104,55 @@ public class UserServiceImpl implements UserService {
             log.error("Erro ao realizar alteração de senha: {}", e.getStatus().getDescription());
             throw new GenericException("Erro ao realizar alteração de senha: " + e.getStatus().getDescription(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public ResponseEntity<GenericResponseDTO> uploadProfilePicture(MultipartFile profileData) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+
+        Optional<UserProfile> userProfile = Optional.ofNullable(userProfileRepository.getByUserId(user.getId()));
+        GenericResponseDTO response = new GenericResponseDTO();
+
+        try {
+            if(userProfile.isPresent()) {
+                userProfile.get().setProfilePicture(profileData.getBytes());
+                userProfileRepository.save(userProfile.get());
+            } else {
+                UserProfile newUserProfile = UserProfile.builder()
+                        .user(user)
+                        .name(profileData.getName())
+                        .profilePicture(profileData.getBytes())
+                        .build();
+                userProfileRepository.save(newUserProfile);
+            }
+
+            response.setMessage("File saved succesfully");
+            response.setStatus(HttpStatus.CREATED.name());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            log.error("Failed to save file: {}", e.getMessage());
+            response.setMessage("Failed to save the file: " + e.getMessage());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.name());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @Override
+    public ResponseEntity<ProfileDataDTO> getProfileData() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+
+        byte[] profilePictureBytes = user.getUserProfile().getProfilePicture();
+        String profilePictureBase64 = Base64.getEncoder().encodeToString(profilePictureBytes);
+
+        ProfileDataDTO responseBody = ProfileDataDTO.builder()
+                .username(user.getFirstAndLastName())
+                .profilePicture(profilePictureBase64)
+                .build();
+
+        return ResponseEntity.ok(responseBody);
     }
 }
