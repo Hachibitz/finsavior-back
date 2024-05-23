@@ -39,6 +39,8 @@ import java.util.Optional;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    private final static Long MAX_PROFILE_IMAGE_SIZE_KB = 5120L;
+
     private final UserRepository userRepository;
     private final DeleteAccountProducer deleteAccountProducer;
     private final Environment environment;
@@ -113,6 +115,13 @@ public class UserServiceImpl implements UserService {
 
         Optional<UserProfile> userProfile = Optional.ofNullable(userProfileRepository.getByUserId(user.getId()));
         GenericResponseDTO response = new GenericResponseDTO();
+
+        if((profileData.getSize()/1024) > MAX_PROFILE_IMAGE_SIZE_KB) {
+            response.setMessage("Tamanho máximo do arquivo excedido: 5MB");
+            response.setStatus(HttpStatus.BAD_REQUEST.name());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
 
         try {
             if(userProfile.isPresent()) {
