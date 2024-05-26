@@ -6,6 +6,8 @@ import br.com.finsavior.grpc.tables.TableDataServiceGrpc;
 import br.com.finsavior.model.dto.AiAdviceDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.entities.User;
+import br.com.finsavior.model.enums.AnalysisType;
+import br.com.finsavior.model.enums.Prompt;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.AiAdviceService;
 import io.grpc.ManagedChannel;
@@ -20,6 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -50,11 +56,13 @@ public class AiAdviceServiceImpl implements AiAdviceService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
 
+        String prompt = getPrompt(aiAdvice, user);
+
         AiAdviceRequest aiAdviceRequest = AiAdviceRequest.newBuilder()
                 .setUserId(user.getId())
-                .setPrompt(aiAdvice.getPrompt())
+                .setPrompt(prompt)
                 .setDate(aiAdvice.getDate())
-                .setAccountTypeId(user.getAccountType().getId().intValue())
+                .setPlanId(Integer.parseInt(user.getUserPlan().getPlanId()))
                 .build();
 
         try {
@@ -86,5 +94,46 @@ public class AiAdviceServiceImpl implements AiAdviceService {
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), e.getStatus().getDescription());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    private String getPrompt(AiAdviceDTO aiAdvice, User user) {
+        AnalysisType chosenAnalysis = Arrays.stream(AnalysisType.values())
+                .filter((type -> Objects.equals(type.getAnalysisTypeId(), aiAdvice.getAnalysisTypeId())))
+                .findFirst()
+                .orElse(null);
+
+        assert chosenAnalysis != null;
+
+        if(!validateAnalisysTypeAndPlan(chosenAnalysis, user)) {
+            List<String> promptParts = getPromptByAnalisysType(chosenAnalysis).getPromptParts();
+            return getFormattedPrompt(promptParts, aiAdvice);
+        }
+
+        return null;
+    }
+
+    private Prompt getPromptByAnalisysType(AnalysisType analysisType) {
+        return Arrays.stream(Prompt.values())
+                .filter(prompt -> prompt.getAnalysisType().equals(analysisType))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String getFormattedPrompt(List<String> promptParts, AiAdviceDTO aiAdvice) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append(promptParts.get(0))
+                .append(aiAdvice.getMainAndIncomeTable()).append("\n\n")
+                .append(promptParts.get(1)).append("\n\n")
+                .append(aiAdvice.getCardTable()).append("\n\n")
+                .append(promptParts.get(2))
+                .append(promptParts.get(3));
+
+        return prompt.toString();
+    }
+
+    private boolean validateAnalisysTypeAndPlan(AnalysisType chosenAnalysis, User user) {
+        assert chosenAnalysis != null;
+        return chosenAnalysis.getPlansCoverageList().stream()
+                .anyMatch(planType -> planType.getPlanTypeId().equals(user.getUserProfile().getPlanId()));
     }
 }

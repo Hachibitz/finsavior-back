@@ -9,22 +9,22 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "account_type")
+@Table(name = "user_plan")
 @Data
-public class AccountType {
+public class UserPlan {
     @Id
-    @Column(name = "id")
-    private Long id;
-    @Column(name = "type_desc")
-    private String typeDesc;
+    @Column(name = "user_id")
+    private Long userId;
+    @Column(name = "plan_id")
+    private String planId;
     @Column(name = "del_fg")
     private char delFg;
-    @Column(name = "user_insert_dtm")
+    @Column(name = "up_insert_dtm")
     private LocalDateTime userInsDtm;
-    @Column(name = "user_insert_id")
+    @Column(name = "up_insert_id")
     private String userInsId;
-    @Column(name = "user_update_dtm")
+    @Column(name = "up_update_dtm")
     private LocalDateTime userUpdDtm;
-    @Column(name = "user_update_id")
+    @Column(name = "up_update_id")
     private String userUpdId;
 }

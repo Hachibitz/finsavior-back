@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
 
-        Optional<UserProfile> userProfile = Optional.ofNullable(userProfileRepository.getByUserId(user.getId()));
+        UserProfile userProfile = userProfileRepository.getByUserId(user.getId());
         GenericResponseDTO response = new GenericResponseDTO();
 
         if((profileData.getSize()/1024) > MAX_PROFILE_IMAGE_SIZE_KB) {
@@ -124,17 +124,8 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
-            if(userProfile.isPresent()) {
-                userProfile.get().setProfilePicture(profileData.getBytes());
-                userProfileRepository.save(userProfile.get());
-            } else {
-                UserProfile newUserProfile = UserProfile.builder()
-                        .user(user)
-                        .name(profileData.getName())
-                        .profilePicture(profileData.getBytes())
-                        .build();
-                userProfileRepository.save(newUserProfile);
-            }
+            userProfile.setProfilePicture(profileData.getBytes());
+            userProfileRepository.save(userProfile);
 
             response.setMessage("File saved succesfully");
             response.setStatus(HttpStatus.CREATED.name());
@@ -155,7 +146,11 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(authentication.getName());
 
         byte[] profilePictureBytes = user.getUserProfile().getProfilePicture();
-        String profilePictureBase64 = Base64.getEncoder().encodeToString(profilePictureBytes);
+        String profilePictureBase64 = null;
+
+        if(profilePictureBytes != null) {
+            profilePictureBase64 = Base64.getEncoder().encodeToString(profilePictureBytes);
+        }
 
         ProfileDataDTO responseBody = ProfileDataDTO.builder()
                 .username(user.getFirstAndLastName())

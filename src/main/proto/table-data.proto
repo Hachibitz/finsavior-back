@@ -71,7 +71,7 @@ message AiAdviceRequest {
   int64 userId = 1;
   string prompt = 2;
   string date = 3;
-  int32 accountTypeId = 4;
+  int32 planId = 4;
 }
 
 message DeleteAllDataRequest {

@@ -12,4 +12,6 @@ import lombok.NoArgsConstructor;
 public class ProfileDataDTO {
     private String username;
     private String profilePicture;
+    private String email;
+    private String plan;
 }
