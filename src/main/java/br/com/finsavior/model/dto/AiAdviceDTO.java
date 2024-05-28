@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class AiAdviceDTO {
-    private String prompt;
+    private Integer analysisTypeId;
+    private String mainAndIncomeTable;
+    private String cardTable;
     private String date;
 }

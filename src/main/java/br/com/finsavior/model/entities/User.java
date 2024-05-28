@@ -1,7 +1,6 @@
 package br.com.finsavior.model.entities;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -17,8 +16,13 @@ public class User {
 
     @Column(name = "first_name")
     private String firstName;
+
     @Column(name = "last_name")
     private String lastName;
+
+    @Column(name = "email")
+    private String email;
+
     private String username;
     private String password;
     private boolean enabled;
@@ -32,13 +36,9 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinTable(
-			name = "user_account_type",
-			joinColumns = @JoinColumn(name = "user_id"),
-			inverseJoinColumns = @JoinColumn(name = "account_type_id")
-	)
-	private AccountType accountType;
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    private UserPlan userPlan;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private UserProfile userProfile;
