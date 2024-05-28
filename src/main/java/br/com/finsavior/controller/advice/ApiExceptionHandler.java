@@ -1,10 +1,9 @@
 package br.com.finsavior.controller.advice;
 
 import br.com.finsavior.exception.DeleteUserException;
-import br.com.finsavior.exception.GenericException;
+import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.exception.AuthTokenException;
 import io.grpc.StatusRuntimeException;
-import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +36,8 @@ public class ApiExceptionHandler {
                 .body(false);
     }
 
-    @ExceptionHandler(GenericException.class)
-    public ResponseEntity<ApiErrorHandlerResponse> handlerGenericException(GenericException e){
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiErrorHandlerResponse> handlerGenericException(BusinessException e){
         log.error("ApiExceptionHandler, message={}", e.getMessage(), e);
         return ResponseEntity
                 .status(e.getStatus())

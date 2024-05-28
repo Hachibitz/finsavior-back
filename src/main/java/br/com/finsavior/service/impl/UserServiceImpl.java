@@ -1,7 +1,7 @@
 package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.DeleteUserException;
-import br.com.finsavior.exception.GenericException;
+import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.grpc.user.UserServiceGrpc;
 import br.com.finsavior.grpc.user.UserServiceGrpc.UserServiceBlockingStub;
 import br.com.finsavior.grpc.user.DeleteAccountRequest;
@@ -11,9 +11,11 @@ import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
 import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.dto.ProfileDataDTO;
+import br.com.finsavior.model.entities.Plan;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.model.entities.UserProfile;
 import br.com.finsavior.producer.DeleteAccountProducer;
+import br.com.finsavior.repository.PlanRepository;
 import br.com.finsavior.repository.UserProfileRepository;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.UserService;
@@ -31,9 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Base64;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -45,15 +45,17 @@ public class UserServiceImpl implements UserService {
     private final DeleteAccountProducer deleteAccountProducer;
     private final Environment environment;
     private final UserProfileRepository userProfileRepository;
+    private final PlanRepository planRepository;
 
     private UserServiceBlockingStub userServiceBlockingStub;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment, UserProfileRepository userProfileRepository) {
+    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment, UserProfileRepository userProfileRepository, PlanRepository planRepository) {
         this.userRepository = userRepository;
         this.deleteAccountProducer = deleteAccountProducer;
         this.environment = environment;
         this.userProfileRepository = userProfileRepository;
+        this.planRepository = planRepository;
     }
 
     @PostConstruct
@@ -104,7 +106,7 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok(response.getMessage());
         } catch (StatusRuntimeException e) {
             log.error("Erro ao realizar alteração de senha: {}", e.getStatus().getDescription());
-            throw new GenericException("Erro ao realizar alteração de senha: " + e.getStatus().getDescription(), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessException("Erro ao realizar alteração de senha: " + e.getStatus().getDescription(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -152,9 +154,13 @@ public class UserServiceImpl implements UserService {
             profilePictureBase64 = Base64.getEncoder().encodeToString(profilePictureBytes);
         }
 
+        Plan plan = planRepository.getById(user.getUserProfile().getPlanId());
+
         ProfileDataDTO responseBody = ProfileDataDTO.builder()
                 .username(user.getFirstAndLastName())
                 .profilePicture(profilePictureBase64)
+                .plan(plan)
+                .email(user.getEmail())
                 .build();
 
         return ResponseEntity.ok(responseBody);

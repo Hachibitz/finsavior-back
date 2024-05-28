@@ -1,5 +1,6 @@
 package br.com.finsavior.service.impl;
 
+import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.grpc.tables.AiAdviceRequest;
 import br.com.finsavior.grpc.tables.GenericResponse;
 import br.com.finsavior.grpc.tables.TableDataServiceGrpc;
@@ -56,6 +57,13 @@ public class AiAdviceServiceImpl implements AiAdviceService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
 
+        AnalysisType chosenAnalysis = getChosenAnalysis(aiAdvice);
+
+        if(!validateAnalysisTypeAndPlan(chosenAnalysis, user)) {
+            log.error("class: AiAdviceServiceImpl, method: generateAiAdviceAndInsights, message: Plano do perfil não possui essa cobertura");
+            throw new BusinessException("Plano do perfil não possui essa cobertura", HttpStatus.EXPECTATION_FAILED);
+        }
+
         String prompt = getPrompt(aiAdvice, user);
 
         AiAdviceRequest aiAdviceRequest = AiAdviceRequest.newBuilder()
@@ -63,6 +71,7 @@ public class AiAdviceServiceImpl implements AiAdviceService {
                 .setPrompt(prompt)
                 .setDate(aiAdvice.getDate())
                 .setPlanId(Integer.parseInt(user.getUserPlan().getPlanId()))
+                .setAnalysisTypeId(chosenAnalysis.getAnalysisTypeId())
                 .build();
 
         try {
@@ -97,22 +106,13 @@ public class AiAdviceServiceImpl implements AiAdviceService {
     }
 
     private String getPrompt(AiAdviceDTO aiAdvice, User user) {
-        AnalysisType chosenAnalysis = Arrays.stream(AnalysisType.values())
-                .filter((type -> Objects.equals(type.getAnalysisTypeId(), aiAdvice.getAnalysisTypeId())))
-                .findFirst()
-                .orElse(null);
+        AnalysisType chosenAnalysis = getChosenAnalysis(aiAdvice);
 
-        assert chosenAnalysis != null;
-
-        if(!validateAnalisysTypeAndPlan(chosenAnalysis, user)) {
-            List<String> promptParts = getPromptByAnalisysType(chosenAnalysis).getPromptParts();
-            return getFormattedPrompt(promptParts, aiAdvice);
-        }
-
-        return null;
+        List<String> promptParts = getPromptByAnalysisType(chosenAnalysis).getPromptParts();
+        return getFormattedPrompt(promptParts, aiAdvice);
     }
 
-    private Prompt getPromptByAnalisysType(AnalysisType analysisType) {
+    private Prompt getPromptByAnalysisType(AnalysisType analysisType) {
         return Arrays.stream(Prompt.values())
                 .filter(prompt -> prompt.getAnalysisType().equals(analysisType))
                 .findFirst()
@@ -131,9 +131,18 @@ public class AiAdviceServiceImpl implements AiAdviceService {
         return prompt.toString();
     }
 
-    private boolean validateAnalisysTypeAndPlan(AnalysisType chosenAnalysis, User user) {
-        assert chosenAnalysis != null;
+    private boolean validateAnalysisTypeAndPlan(AnalysisType chosenAnalysis, User user) {
         return chosenAnalysis.getPlansCoverageList().stream()
                 .anyMatch(planType -> planType.getPlanTypeId().equals(user.getUserProfile().getPlanId()));
+    }
+
+    private AnalysisType getChosenAnalysis(AiAdviceDTO aiAdvice) {
+        AnalysisType chosenAnalysis = Arrays.stream(AnalysisType.values())
+                .filter((type -> Objects.equals(type.getAnalysisTypeId(), aiAdvice.getAnalysisTypeId())))
+                .findFirst()
+                .orElse(null);
+
+        assert chosenAnalysis != null;
+        return chosenAnalysis;
     }
 }

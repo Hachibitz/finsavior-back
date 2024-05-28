@@ -36,13 +36,9 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinTable(
-			name = "user_plan",
-			joinColumns = @JoinColumn(name = "user_id"),
-			inverseJoinColumns = @JoinColumn(name = "plan_id")
-	)
-	private UserPlan userPlan;
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    private UserPlan userPlan;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private UserProfile userProfile;

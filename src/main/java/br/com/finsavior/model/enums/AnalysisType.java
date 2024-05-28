@@ -8,7 +8,7 @@ import java.util.List;
 public enum AnalysisType {
     MONTH(1, List.of(PlanType.FREE, PlanType.PLUS, PlanType.PREMIUM)),
     TRIMESTER(2, List.of(PlanType.PLUS, PlanType.PREMIUM)),
-    ANNUAL(3, List.of(PlanType.PREMIUM));
+    ANNUAL(3, List.of(PlanType.PLUS, PlanType.PREMIUM));
 
     private final Integer analysisTypeId;
     private final List<PlanType> plansCoverageList;
