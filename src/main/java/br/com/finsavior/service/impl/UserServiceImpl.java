@@ -182,11 +182,12 @@ public class UserServiceImpl implements UserService {
                     .planId(planId)
                     .userId(externalUserdto.getUserId())
                     .externalUserId(externalUserdto.getServiceUserId())
-                    .planType(PlanType.fromValue(Long.valueOf(externalUserdto.getPlanId())).toString())
+                    .planType(PlanType.fromValue(externalUserdto.getPlanId()).getPlanTypeId())
                     .updateTime(LocalDateTime.now())
                     .build();
 
             user.getUserPlan().setPlanId(planId);
+            user.getUserProfile().setPlanId(planId);
             userRepository.save(user);
             planHistoryRepository.save(planChangeHistory);
             log.info("method = updateUserPlan, message = Plano do user: {}, atualizado com sucesso!", externalUserdto.getUserId());

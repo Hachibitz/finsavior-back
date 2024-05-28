@@ -31,7 +31,7 @@ public class UserProfile {
     private byte[] profilePicture;
 
     @Column(name = "plan_id")
-    private Long planId;
+    private String planId;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")

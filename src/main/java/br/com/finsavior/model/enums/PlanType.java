@@ -1,25 +1,25 @@
 package br.com.finsavior.model.enums;
 
+import br.com.finsavior.model.entities.Plan;
+import java.util.Arrays;
 import lombok.Getter;
 
 @Getter
 public enum PlanType {
-    FREE(1L),
-    PLUS(2L),
-    PREMIUM(3L);
+    FREE("1L"),
+    PLUS("2L"),
+    PREMIUM("3L");
 
-    private final Long planTypeId;
+    private final String planTypeId;
 
-    PlanType(Long planTypeId) {
+    PlanType(String planTypeId) {
         this.planTypeId = planTypeId;
     }
 
-    public static PlanType fromValue(Long value) {
-        for (PlanType type : PlanType.values()) {
-            if (type.getPlanTypeId() == value) {
-                return type;
-            }
-        }
-        throw new IllegalArgumentException("No enum constant with value " + value);
+    public static PlanType fromValue(String value) {
+        return Arrays.stream(PlanType.values())
+                .filter(planType -> planType.planTypeId.equals(value))
+                .findFirst()
+                .orElse(null);
     }
 }

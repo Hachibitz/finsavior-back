@@ -4,5 +4,5 @@ import br.com.finsavior.model.entities.ExternalUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ExternalUserRepository extends JpaRepository<ExternalUser, Long> {
-    ExternalUser findByServiceUserId(String serviceUserId);
+    ExternalUser findByServiceUserId(String subscriptionId);
 }

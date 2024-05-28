@@ -84,11 +84,9 @@ public class WebhookServiceImpl implements WebhookService {
     }
 
     private void activatedEvent(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
-        if(Objects.equals(externalUser.getPlanId(), PlanType.FREE.getPlanTypeId().toString())){
+        if(Objects.equals(externalUser.getPlanId(), PlanType.FREE.getPlanTypeId())){
             externalUser.setPlanId(
-                    PlanType.fromValue(
-                            Long.valueOf(webhookRequestDTO.getResource().getPlanId()
-                            )).toString());
+                    PlanType.fromValue(webhookRequestDTO.getResource().getPlanId()).getPlanTypeId());
             userService.updateUserPlan(externalUser);
         }
         throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
