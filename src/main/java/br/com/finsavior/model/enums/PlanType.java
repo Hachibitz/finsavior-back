@@ -13,4 +13,13 @@ public enum PlanType {
     PlanType(Long planTypeId) {
         this.planTypeId = planTypeId;
     }
+
+    public static PlanType fromValue(Long value) {
+        for (PlanType type : PlanType.values()) {
+            if (type.getPlanTypeId() == value) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value " + value);
+    }
 }
