@@ -70,7 +70,7 @@ public class AiAdviceServiceImpl implements AiAdviceService {
                 .setUserId(user.getId())
                 .setPrompt(prompt)
                 .setDate(aiAdvice.getDate())
-                .setPlanId(Integer.parseInt(user.getUserPlan().getPlanId()))
+                .setPlanId(user.getUserPlan().getPlanId())
                 .setAnalysisTypeId(chosenAnalysis.getAnalysisTypeId())
                 .build();
 

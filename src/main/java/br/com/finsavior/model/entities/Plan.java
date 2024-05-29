@@ -12,7 +12,7 @@ import lombok.Data;
 public class Plan {
     @Id
     @Column(name = "plan_id")
-    private Long planId;
+    private String planId;
     @Column(name = "plan_ds")
     private String planDs;
 }

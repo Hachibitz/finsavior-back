@@ -9,12 +9,16 @@ import br.com.finsavior.grpc.user.ChangePasswordRequest;
 import br.com.finsavior.grpc.tables.GenericResponse;
 import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
 import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
+import br.com.finsavior.model.dto.ExternalUserDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.dto.ProfileDataDTO;
 import br.com.finsavior.model.entities.Plan;
+import br.com.finsavior.model.entities.PlanChangeHistory;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.model.entities.UserProfile;
+import br.com.finsavior.model.enums.PlanType;
 import br.com.finsavior.producer.DeleteAccountProducer;
+import br.com.finsavior.repository.PlanHistoryRepository;
 import br.com.finsavior.repository.PlanRepository;
 import br.com.finsavior.repository.UserProfileRepository;
 import br.com.finsavior.repository.UserRepository;
@@ -23,6 +27,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -46,16 +51,18 @@ public class UserServiceImpl implements UserService {
     private final Environment environment;
     private final UserProfileRepository userProfileRepository;
     private final PlanRepository planRepository;
+    private final PlanHistoryRepository planHistoryRepository;
 
     private UserServiceBlockingStub userServiceBlockingStub;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment, UserProfileRepository userProfileRepository, PlanRepository planRepository) {
+    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment, UserProfileRepository userProfileRepository, PlanRepository planRepository, PlanHistoryRepository planHistoryRepository) {
         this.userRepository = userRepository;
         this.deleteAccountProducer = deleteAccountProducer;
         this.environment = environment;
         this.userProfileRepository = userProfileRepository;
         this.planRepository = planRepository;
+        this.planHistoryRepository = planHistoryRepository;
     }
 
     @PostConstruct
@@ -164,5 +171,28 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         return ResponseEntity.ok(responseBody);
+    }
+
+    @Override
+    public void updateUserPlan(ExternalUserDTO externalUserdto){
+        User user = userRepository.findByUsername(externalUserdto.getUserId());
+        String planId = externalUserdto.getPlanId();
+        try {
+            PlanChangeHistory planChangeHistory = PlanChangeHistory.builder()
+                    .planId(planId)
+                    .userId(externalUserdto.getUserId())
+                    .externalUserId(externalUserdto.getServiceUserId())
+                    .planType(PlanType.fromValue(externalUserdto.getPlanId()).getPlanTypeId())
+                    .updateTime(LocalDateTime.now())
+                    .build();
+
+            user.getUserPlan().setPlanId(planId);
+            user.getUserProfile().setPlanId(planId);
+            userRepository.save(user);
+            planHistoryRepository.save(planChangeHistory);
+            log.info("method = updateUserPlan, message = Plano do user: {}, atualizado com sucesso!", externalUserdto.getUserId());
+        }catch (Exception e){
+            throw new BusinessException(e.getMessage());
+        }
     }
 }
