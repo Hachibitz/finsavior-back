@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface PlanRepository extends JpaRepository<Plan, Long> {
     @NotNull
     @Query(value = "SELECT * FROM plans WHERE plan_id = :planId AND del_fg <> 'S'", nativeQuery = true)
-    public Plan getById(@NotNull Long planId);
+    public Plan getById(@NotNull String planId);
 }
