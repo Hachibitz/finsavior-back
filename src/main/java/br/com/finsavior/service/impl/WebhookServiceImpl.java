@@ -29,15 +29,15 @@ public class WebhookServiceImpl implements WebhookService {
         ExternalUserDTO externalUserdto;
         try {
             externalUserdto = externalUserMapper.toExternalUserDTO(
-                    externalUserRepository.findByServiceUserId(webhookRequestDTO.getResource().getId())
+                    externalUserRepository.findBySubscriptionId(webhookRequestDTO.getResource().getId())
             );
 
             switch(webhookRequestDTO.getEvent_type()){
                 case BILLING_SUBSCRIPTION_ACTIVATED -> activatedEvent(externalUserdto, webhookRequestDTO);
-                case BILLING_SUBSCRIPTION_EXPIRED -> expiredEvent(externalUserdto, webhookRequestDTO);
-                case BILLING_SUBSCRIPTION_CANCELLED -> cancelledEvent(externalUserdto, webhookRequestDTO);
-                case BILLING_SUBSCRIPTION_PAYMENT_FAILED -> paymentFailedEvent(externalUserdto, webhookRequestDTO);
-                case BILLING_SUBSCRIPTION_SUSPENDED -> suspendedEvent(externalUserdto, webhookRequestDTO);
+                case BILLING_SUBSCRIPTION_EXPIRED -> expiredEvent(externalUserdto);
+                case BILLING_SUBSCRIPTION_CANCELLED -> cancelledEvent(externalUserdto);
+                case BILLING_SUBSCRIPTION_PAYMENT_FAILED -> paymentFailedEvent(externalUserdto);
+                case BILLING_SUBSCRIPTION_SUSPENDED -> suspendedEvent(externalUserdto);
                 default -> throw new EventNotFound("Evento não mapeado!");
 
             }
@@ -47,53 +47,62 @@ public class WebhookServiceImpl implements WebhookService {
         return ResponseEntity.ok().build();
     }
 
-    private void suspendedEvent(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
-        if((Objects.equals(externalUser.getPlanId(), PlanType.PLUS.getPlanTypeId()) ||
-                Objects.equals(externalUser.getPlanId(), PlanType.PREMIUM.getPlanTypeId()))){
-            externalUser.setPlanId(PlanType.FREE.getPlanTypeId());
-            userService.updateUserPlan(externalUser);
+    private void suspendedEvent(ExternalUserDTO externalUser) {
+        try {
+            downgradeUserPlan(externalUser);
+        } catch (Exception e) {
+            throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
         }
-        throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
     }
 
-    private void paymentFailedEvent(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
-        if((Objects.equals(externalUser.getPlanId(), PlanType.PLUS.getPlanTypeId()) ||
-                Objects.equals(externalUser.getPlanId(), PlanType.PREMIUM.getPlanTypeId()))){
-            externalUser.setPlanId(PlanType.FREE.getPlanTypeId());
-            userService.updateUserPlan(externalUser);
+    private void paymentFailedEvent(ExternalUserDTO externalUser) {
+        try {
+            downgradeUserPlan(externalUser);
+        } catch (Exception e) {
+            throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
         }
-        throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
     }
 
-    private void cancelledEvent(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
-        if((Objects.equals(externalUser.getPlanId(), PlanType.PLUS.getPlanTypeId()) ||
-                Objects.equals(externalUser.getPlanId(), PlanType.PREMIUM.getPlanTypeId()))){
-            externalUser.setPlanId(PlanType.FREE.getPlanTypeId());
-            userService.updateUserPlan(externalUser);
+    private void cancelledEvent(ExternalUserDTO externalUser) {
+        try {
+            downgradeUserPlan(externalUser);
+        } catch (Exception e) {
+            throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
         }
-        throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
     }
 
-    private void expiredEvent(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
-        if((Objects.equals(externalUser.getPlanId(), PlanType.PLUS.getPlanTypeId()) ||
-                Objects.equals(externalUser.getPlanId(), PlanType.PREMIUM.getPlanTypeId()))){
-            externalUser.setPlanId(PlanType.FREE.getPlanTypeId());
-            userService.updateUserPlan(externalUser);
+    private void expiredEvent(ExternalUserDTO externalUser) {
+        try {
+            downgradeUserPlan(externalUser);
+        } catch (Exception e) {
+            throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
         }
-        throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
     }
 
     private void activatedEvent(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
-        if(Objects.equals(externalUser.getPlanId(), PlanType.FREE.getPlanTypeId())){
-            externalUser.setPlanId(
-                    PlanType.fromValue(webhookRequestDTO.getResource().getPlanId()).getPlanTypeId());
-            userService.updateUserPlan(externalUser);
+        try {
+            upgradeUserPlan(externalUser, webhookRequestDTO);
+        } catch (Exception e) {
+            throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
         }
-        throw new BusinessException("Error ao atualizar plano do usuário: " + externalUser.getUserId());
     }
 
     private void createdEvent(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
     }
 
+    private void downgradeUserPlan(ExternalUserDTO externalUser) {
+        if((Objects.equals(externalUser.getPlanId(), PlanType.PLUS.getPlanTypeId()) ||
+                Objects.equals(externalUser.getPlanId(), PlanType.PREMIUM.getPlanTypeId()))){
+            externalUser.setPlanId(PlanType.FREE.getPlanTypeId());
+            userService.updateUserPlan(externalUser);
+        }
+    }
 
+    private void upgradeUserPlan(ExternalUserDTO externalUser, WebhookRequestDTO webhookRequestDTO) {
+        if(Objects.equals(externalUser.getPlanId(), PlanType.FREE.getPlanTypeId())){
+            externalUser.setPlanId(
+                    PlanType.fromValue(webhookRequestDTO.getResource().getPlanId()).getPlanTypeId());
+            userService.updateUserPlan(externalUser);
+        }
+    }
 }

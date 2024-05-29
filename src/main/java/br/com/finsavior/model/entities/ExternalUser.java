@@ -26,8 +26,8 @@ public class ExternalUser {
     @Column(name = "subscription_id")
     private String subscriptionId;
 
-    @Column(name = "service_user_id")
-    private String serviceUserId;
+    @Column(name = "external_user_id")
+    private String externalUserId;
 
     @Column(name = "service_name")
     private ExternalService service;
