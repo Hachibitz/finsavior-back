@@ -1,11 +1,8 @@
 package br.com.finsavior.model.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import br.com.finsavior.model.enums.Flag;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +18,7 @@ public class PlanChangeHistory {
     private Long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Column(name = "external_user_id")
     private String externalUserId;
@@ -35,4 +32,15 @@ public class PlanChangeHistory {
     @Column(name = "update_time")
     private LocalDateTime updateTime;
 
+    @Column(name = "del_fg")
+    @Enumerated(EnumType.STRING)
+    private Flag delFg;
+    @Column(name = "eu_insert_dtm")
+    private LocalDateTime userInsDtm;
+    @Column(name = "eu_insert_id")
+    private String userInsId;
+    @Column(name = "eu_update_dtm")
+    private LocalDateTime userUpdDtm;
+    @Column(name = "eu_update_id")
+    private String userUpdId;
 }

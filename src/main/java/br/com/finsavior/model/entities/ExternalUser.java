@@ -1,18 +1,11 @@
 package br.com.finsavior.model.entities;
 
-import br.com.finsavior.model.enums.ExternalService;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import br.com.finsavior.model.enums.ExternalProvider;
+import br.com.finsavior.model.enums.Flag;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "external_user")
@@ -29,13 +22,26 @@ public class ExternalUser {
     @Column(name = "external_user_id")
     private String externalUserId;
 
+    @Column(name = "external_user_email")
+    private String externalUserEmail;
+
     @Column(name = "service_name")
-    private ExternalService service;
+    private ExternalProvider externalProvider;
 
     @ManyToOne
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 
-
+    @Column(name = "del_fg")
+    @Enumerated(EnumType.STRING)
+    private Flag delFg;
+    @Column(name = "eu_insert_dtm")
+    private LocalDateTime userInsDtm;
+    @Column(name = "eu_insert_id")
+    private String userInsId;
+    @Column(name = "eu_update_dtm")
+    private LocalDateTime userUpdDtm;
+    @Column(name = "eu_update_id")
+    private String userUpdId;
 }

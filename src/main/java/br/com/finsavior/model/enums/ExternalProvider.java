@@ -1,5 +1,5 @@
 package br.com.finsavior.model.enums;
 
-public enum ExternalService {
+public enum ExternalProvider {
     PAYPAL
 }

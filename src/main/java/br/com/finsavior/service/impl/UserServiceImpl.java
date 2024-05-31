@@ -175,13 +175,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserPlan(ExternalUserDTO externalUserdto){
-        User user = userRepository.findByUsername(externalUserdto.getUserId());
+        User user = userRepository.getById(externalUserdto.getUserId());
         String planId = externalUserdto.getPlanId();
         try {
             PlanChangeHistory planChangeHistory = PlanChangeHistory.builder()
                     .planId(planId)
                     .userId(externalUserdto.getUserId())
-                    .externalUserId(externalUserdto.getServiceUserId())
+                    .externalUserId(externalUserdto.getExternalUserId())
                     .planType(PlanType.fromValue(externalUserdto.getPlanId()).getPlanTypeId())
                     .updateTime(LocalDateTime.now())
                     .build();

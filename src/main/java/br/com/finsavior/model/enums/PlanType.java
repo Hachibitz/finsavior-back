@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum PlanType {
     FREE("1L"),
-    PLUS("2L"),
+    PLUS("P-2BA47576SC596340BMZMJJRQ"),
     PREMIUM("3L");
 
     private final String planTypeId;

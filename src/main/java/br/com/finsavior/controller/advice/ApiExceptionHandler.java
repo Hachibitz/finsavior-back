@@ -3,6 +3,7 @@ package br.com.finsavior.controller.advice;
 import br.com.finsavior.exception.DeleteUserException;
 import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.exception.AuthTokenException;
+import br.com.finsavior.exception.PaymentException;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,17 @@ public class ApiExceptionHandler {
                 .status(e.getStatus())
                 .body(new ApiErrorHandlerResponse(
                         e.getStatus().value(),
+                        e.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<ApiErrorHandlerResponse> handleValidateTokenErrorException(PaymentException e){
+        log.error("ApiExceptionHandler, message={}", e.getMessage(), e);
+        return ResponseEntity
+                .status(HttpStatus.PAYMENT_REQUIRED)
+                .body(new ApiErrorHandlerResponse(
+                        HttpStatus.PAYMENT_REQUIRED.value(),
                         e.getMessage()
                 ));
     }
