@@ -1,5 +1,6 @@
 package br.com.finsavior.model.entities;
 
+import br.com.finsavior.model.enums.Flag;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +16,8 @@ public class UserPlan {
     @Column(name = "plan_id")
     private String planId;
     @Column(name = "del_fg")
-    private char delFg;
+    @Enumerated(EnumType.STRING)
+    private Flag delFg;
     @Column(name = "up_insert_dtm")
     private LocalDateTime userInsDtm;
     @Column(name = "up_insert_id")

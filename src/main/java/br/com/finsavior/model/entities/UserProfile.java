@@ -1,5 +1,6 @@
 package br.com.finsavior.model.entities;
 
+import br.com.finsavior.model.enums.Flag;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,7 +39,8 @@ public class UserProfile {
     private User user;
 
     @Column(name = "del_fg")
-    private char delFg;
+    @Enumerated(EnumType.STRING)
+    private Flag delFg;
     @Column(name = "upf_insert_dtm")
     private LocalDateTime userInsDtm;
     @Column(name = "upf_insert_id")
