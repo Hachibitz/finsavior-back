@@ -3,7 +3,7 @@ package br.com.finsavior.model.dto;
 import lombok.Data;
 
 @Data
-public class Address {
+public class AddressDTO {
     private String addressLine1;
     private String addressLine2;
     private String adminArea2;

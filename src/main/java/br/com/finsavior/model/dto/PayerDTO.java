@@ -3,9 +3,9 @@ package br.com.finsavior.model.dto;
 import lombok.Data;
 
 @Data
-public class Payer {
-    private Name name;
+public class PayerDTO {
+    private NameDTO name;
     private String externalEmailAddress;
     private String payerId;
-    private Address address;
+    private AddressDTO address;
 }

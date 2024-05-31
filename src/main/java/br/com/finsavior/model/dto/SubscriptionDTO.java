@@ -12,7 +12,7 @@ public class SubscriptionDTO {
     private String subscriptionId;
     private String intent;
     private String status;
-    private ArrayList<PurchaseUnit> purchaseUnits;
-    private Payer payer;
+    private ArrayList<PurchaseUnitDTO> purchaseUnits;
+    private PayerDTO payer;
     private LocalDateTime createTime;
 }
