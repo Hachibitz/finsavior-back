@@ -16,6 +16,7 @@ import br.com.finsavior.model.entities.Plan;
 import br.com.finsavior.model.entities.PlanChangeHistory;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.model.entities.UserProfile;
+import br.com.finsavior.model.enums.Flag;
 import br.com.finsavior.model.enums.PlanType;
 import br.com.finsavior.producer.DeleteAccountProducer;
 import br.com.finsavior.repository.PlanHistoryRepository;
@@ -54,6 +55,7 @@ public class UserServiceImpl implements UserService {
     private final PlanHistoryRepository planHistoryRepository;
 
     private UserServiceBlockingStub userServiceBlockingStub;
+    private final static String APP_ID = "finsavior-app";
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment, UserProfileRepository userProfileRepository, PlanRepository planRepository, PlanHistoryRepository planHistoryRepository) {
@@ -184,6 +186,11 @@ public class UserServiceImpl implements UserService {
                     .externalUserId(externalUserdto.getExternalUserId())
                     .planType(PlanType.fromValue(externalUserdto.getPlanId()).getPlanTypeId())
                     .updateTime(LocalDateTime.now())
+                    .delFg(Flag.N)
+                    .userInsDtm(LocalDateTime.now())
+                    .userInsId(APP_ID)
+                    .userUpdDtm(LocalDateTime.now())
+                    .userUpdId(APP_ID)
                     .build();
 
             user.getUserPlan().setPlanId(planId);
