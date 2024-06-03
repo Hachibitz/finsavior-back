@@ -1,7 +1,9 @@
 package br.com.finsavior.model.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 
+@Getter
 public enum EventTypeEnum {
     BILLING_SUBSCRIPTION_ACTIVATED("BILLING.SUBSCRIPTION.ACTIVATED"),
     BILLING_SUBSCRIPTION_CANCELLED("BILLING.SUBSCRIPTION.CANCELLED"),
@@ -11,16 +13,16 @@ public enum EventTypeEnum {
     BILLING_SUBSCRIPTION_SUSPENDED("BILLING.SUBSCRIPTION.SUSPENDED");
 
 
-    private String name;
+    private final String value;
 
-    EventTypeEnum(String name) {this.name = name;}
+    EventTypeEnum(String value) {this.value = value;}
 
     @JsonValue
-    private String getName(){
-        return this.name;
+    private String getValue(){
+        return this.value;
     }
 
     public static EventTypeEnum valueOf(EventTypeEnum eventTypeEnum){
-        return valueOf(eventTypeEnum.name);
+        return valueOf(eventTypeEnum.value);
     }
 }

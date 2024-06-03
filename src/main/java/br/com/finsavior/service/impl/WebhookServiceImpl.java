@@ -4,6 +4,7 @@ import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.exception.EventNotFound;
 import br.com.finsavior.model.dto.ExternalUserDTO;
 import br.com.finsavior.model.dto.WebhookRequestDTO;
+import br.com.finsavior.model.enums.EventTypeEnum;
 import br.com.finsavior.model.enums.PlanType;
 import br.com.finsavior.model.mapper.ExternalUserMapper;
 import br.com.finsavior.repository.ExternalUserRepository;
