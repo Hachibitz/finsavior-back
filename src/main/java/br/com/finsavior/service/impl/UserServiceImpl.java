@@ -179,27 +179,43 @@ public class UserServiceImpl implements UserService {
     public void updateUserPlan(ExternalUserDTO externalUserdto){
         User user = userRepository.getById(externalUserdto.getUserId());
         String planId = externalUserdto.getPlanId();
-        try {
-            PlanChangeHistory planChangeHistory = PlanChangeHistory.builder()
-                    .planId(planId)
-                    .userId(externalUserdto.getUserId())
-                    .externalUserId(externalUserdto.getExternalUserId())
-                    .planType(PlanType.fromValue(externalUserdto.getPlanId()).getPlanTypeId())
-                    .updateTime(LocalDateTime.now())
-                    .delFg(Flag.N)
-                    .userInsDtm(LocalDateTime.now())
-                    .userInsId(APP_ID)
-                    .userUpdDtm(LocalDateTime.now())
-                    .userUpdId(APP_ID)
-                    .build();
 
-            user.getUserPlan().setPlanId(planId);
-            user.getUserProfile().setPlanId(planId);
+        try {
+            PlanChangeHistory planChangeHistory = getPlanchangeHistory(externalUserdto, planId);
+            setProfileAndPlan(user, planId);
+
             userRepository.save(user);
+
             planHistoryRepository.save(planChangeHistory);
+
             log.info("method = updateUserPlan, message = Plano do user: {}, atualizado com sucesso!", externalUserdto.getUserId());
         }catch (Exception e){
             throw new BusinessException(e.getMessage());
         }
+    }
+
+    private PlanChangeHistory getPlanchangeHistory(ExternalUserDTO externalUserdto, String planId) {
+        return PlanChangeHistory.builder()
+                .planId(planId)
+                .userId(externalUserdto.getUserId())
+                .externalUserId(externalUserdto.getExternalUserId())
+                .planType(PlanType.fromValue(externalUserdto.getPlanId()).getPlanTypeId())
+                .updateTime(LocalDateTime.now())
+                .delFg(Flag.N)
+                .userInsDtm(LocalDateTime.now())
+                .userInsId(APP_ID)
+                .userUpdDtm(LocalDateTime.now())
+                .userUpdId(APP_ID)
+                .build();
+    }
+
+    private void setProfileAndPlan(User user, String planId) {
+        user.getUserPlan().setPlanId(planId);
+        user.getUserPlan().setUserUpdDtm(LocalDateTime.now());
+        user.getUserPlan().setUserUpdId(APP_ID);
+
+        user.getUserProfile().setPlanId(planId);
+        user.getUserProfile().setUserUpdDtm(LocalDateTime.now());
+        user.getUserProfile().setUserUpdId(APP_ID);
     }
 }
