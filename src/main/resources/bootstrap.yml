@@ -1,13 +1,13 @@
 spring:
   application:
-    name: finsavior-back
+    name: dev
   cloud:
     config:
-      uri: '${finsavior-configserver-url}'
+      uri: http://localhost:8084
       enabled: true
       fail-fast: true
       name: '${spring.application.name}'
-      label: dev
+      label: finsavior-back
 
 server:
   port: 8085
