@@ -16,4 +16,5 @@ public class AiAdviceDTO {
     private String mainAndIncomeTable;
     private String cardTable;
     private String date;
+    private Double temperature;
 }

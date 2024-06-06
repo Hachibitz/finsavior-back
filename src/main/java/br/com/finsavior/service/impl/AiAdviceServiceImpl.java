@@ -72,6 +72,7 @@ public class AiAdviceServiceImpl implements AiAdviceService {
                 .setDate(aiAdvice.getDate())
                 .setPlanId(user.getUserPlan().getPlanId())
                 .setAnalysisTypeId(chosenAnalysis.getAnalysisTypeId())
+                .setTemperature(aiAdvice.getTemperature())
                 .build();
 
         try {
