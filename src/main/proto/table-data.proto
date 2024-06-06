@@ -73,6 +73,7 @@ message AiAdviceRequest {
   string date = 3;
   string planId = 4;
   int32 analysisTypeId = 5;
+  double temperature = 6;
 }
 
 message DeleteAllDataRequest {
