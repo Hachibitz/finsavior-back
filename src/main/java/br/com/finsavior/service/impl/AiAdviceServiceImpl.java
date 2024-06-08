@@ -1,10 +1,9 @@
 package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.BusinessException;
-import br.com.finsavior.grpc.tables.AiAdviceRequest;
-import br.com.finsavior.grpc.tables.GenericResponse;
-import br.com.finsavior.grpc.tables.TableDataServiceGrpc;
+import br.com.finsavior.grpc.tables.*;
 import br.com.finsavior.model.dto.AiAdviceDTO;
+import br.com.finsavior.model.dto.AiAnalysisResponseDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.model.enums.AnalysisType;
@@ -16,6 +15,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -24,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -73,6 +74,8 @@ public class AiAdviceServiceImpl implements AiAdviceService {
                 .setPlanId(user.getUserPlan().getPlanId())
                 .setAnalysisTypeId(chosenAnalysis.getAnalysisTypeId())
                 .setTemperature(aiAdvice.getTemperature())
+                .setStartDate(aiAdvice.getStartDate().toString())
+                .setFinishDate(aiAdvice.getFinishDate().toString())
                 .build();
 
         try {
@@ -87,22 +90,27 @@ public class AiAdviceServiceImpl implements AiAdviceService {
     }
 
     @Override
-    public ResponseEntity<GenericResponseDTO> getAiAdviceAndInsights() {
+    public ResponseEntity<List<AiAnalysisResponseDTO>> getAiAnalysisList() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
 
-        AiAdviceRequest aiAdviceRequest = AiAdviceRequest.newBuilder()
+        AiAnalysisRequest aiAnalysisListRequest = AiAnalysisRequest.newBuilder()
                 .setUserId(user.getId())
                 .build();
 
         try {
-            GenericResponse genericResponse = tableDataServiceBlockingStub.getAiAdviceAndInsights(aiAdviceRequest);
-            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
+            AiAnalysisResponse aiAnalysisListResponse = tableDataServiceBlockingStub.getAiAnalysisList(aiAnalysisListRequest);
+            List<AiAnalysisResponseDTO> response = new ArrayList<AiAnalysisResponseDTO>();
+
+            aiAnalysisListResponse.getAiAnalysisListList().forEach((aiAnalysis -> {
+                ModelMapper mapper = new ModelMapper();
+                response.add(mapper.map(aiAnalysis, AiAnalysisResponseDTO.class));
+            }));
+
             return ResponseEntity.ok(response);
         } catch (StatusRuntimeException e) {
             log.error(e.getStatus().getDescription());
-            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), e.getStatus().getDescription());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            throw new BusinessException(e.getStatus().getDescription());
         }
     }
 

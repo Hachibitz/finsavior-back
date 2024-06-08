@@ -74,9 +74,29 @@ message AiAdviceRequest {
   string planId = 4;
   int32 analysisTypeId = 5;
   double temperature = 6;
+  string startDate = 7;
+  string finishDate = 8;
 }
 
 message DeleteAllDataRequest {
+  int64 userId = 1;
+}
+
+message AiAnalysis {
+  int64 id = 1;
+  int32 analysisType = 2;
+  string resultAnalysis = 3;
+  string date = 4;
+  string startDate = 5;
+  string finishDate = 6;
+  float temperature = 7;
+}
+
+message AiAnalysisResponse {
+  repeated AiAnalysis aiAnalysisList = 1;
+}
+
+message AiAnalysisRequest {
   int64 userId = 1;
 }
 
@@ -89,6 +109,6 @@ service TableDataService {
   rpc editItemFromMainTable(BillUpdateRequest) returns (GenericResponse);
   rpc editItemFromCardTable(BillUpdateRequest) returns (GenericResponse);
   rpc generateAiAdviceAndInsights(AiAdviceRequest) returns (GenericResponse);
-  rpc getAiAdviceAndInsights(AiAdviceRequest) returns (GenericResponse);
+  rpc getAiAnalysisList(AiAnalysisRequest) returns (AiAnalysisResponse);
   rpc deleteAllUserData(DeleteAllDataRequest) returns (GenericResponse);
 }
