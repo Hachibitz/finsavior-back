@@ -3,6 +3,7 @@ package br.com.finsavior.service.impl;
 import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.grpc.tables.*;
 import br.com.finsavior.model.dto.AiAdviceDTO;
+import br.com.finsavior.model.dto.AiAdviceResponseDTO;
 import br.com.finsavior.model.dto.AiAnalysisResponseDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.entities.User;
@@ -54,7 +55,7 @@ public class AiAdviceServiceImpl implements AiAdviceService {
     }
 
     @Override
-    public ResponseEntity<GenericResponseDTO> generateAiAdviceAndInsights(AiAdviceDTO aiAdvice) {
+    public ResponseEntity<AiAdviceResponseDTO> generateAiAdviceAndInsights(AiAdviceDTO aiAdvice) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(authentication.getName());
 
@@ -79,13 +80,12 @@ public class AiAdviceServiceImpl implements AiAdviceService {
                 .build();
 
         try {
-            GenericResponse genericResponse = tableDataServiceBlockingStub.generateAiAdviceAndInsights(aiAdviceRequest);
-            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.OK.toString(), genericResponse.getMessage());
+            AiAdviceResponse grpcResponse = tableDataServiceBlockingStub.generateAiAdviceAndInsights(aiAdviceRequest);
+            AiAdviceResponseDTO response = new AiAdviceResponseDTO(grpcResponse.getAnalysisId());
             return ResponseEntity.ok(response);
         } catch (StatusRuntimeException e) {
             log.error(e.getStatus().getDescription());
-            GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), e.getStatus().getDescription());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            throw new BusinessException(e.getStatus().getDescription());
         }
     }
 
@@ -112,6 +112,25 @@ public class AiAdviceServiceImpl implements AiAdviceService {
             log.error(e.getStatus().getDescription());
             throw new BusinessException(e.getStatus().getDescription());
         }
+    }
+
+    @Override
+    public ResponseEntity<GenericResponseDTO> deleteAnalysis(Long analysisId) {
+        DeleteAiAnalysisRequest request = DeleteAiAnalysisRequest.newBuilder()
+                .setAiAnalysisId(analysisId)
+                .build();
+
+        GenericResponseDTO response;
+
+        try {
+            GenericResponse grpcResponse = tableDataServiceBlockingStub.deleteAiAnalysis(request);
+            response = new GenericResponseDTO(HttpStatus.OK.name(), grpcResponse.getMessage());
+        } catch (StatusRuntimeException e) {
+            log.error(e.getStatus().getDescription());
+            throw new BusinessException(e.getStatus().getDescription());
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     private String getPrompt(AiAdviceDTO aiAdvice, User user) {

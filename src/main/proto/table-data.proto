@@ -78,6 +78,10 @@ message AiAdviceRequest {
   string finishDate = 8;
 }
 
+message AiAdviceResponse {
+  int64 analysisId = 1;
+}
+
 message DeleteAllDataRequest {
   int64 userId = 1;
 }
@@ -100,6 +104,10 @@ message AiAnalysisRequest {
   int64 userId = 1;
 }
 
+message DeleteAiAnalysisRequest {
+  int64 aiAnalysisId = 1;
+}
+
 service TableDataService {
   rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
   rpc loadMainTableData(MainTableDataRequest) returns (MainTableDataResponse);
@@ -108,7 +116,8 @@ service TableDataService {
   rpc deleteItemFromCardTable(DeleteItemFromTableRequest) returns (GenericResponse);
   rpc editItemFromMainTable(BillUpdateRequest) returns (GenericResponse);
   rpc editItemFromCardTable(BillUpdateRequest) returns (GenericResponse);
-  rpc generateAiAdviceAndInsights(AiAdviceRequest) returns (GenericResponse);
+  rpc generateAiAdviceAndInsights(AiAdviceRequest) returns (AiAdviceResponse);
+  rpc deleteAiAnalysis(DeleteAiAnalysisRequest) returns (GenericResponse);
   rpc getAiAnalysisList(AiAnalysisRequest) returns (AiAnalysisResponse);
   rpc deleteAllUserData(DeleteAllDataRequest) returns (GenericResponse);
 }

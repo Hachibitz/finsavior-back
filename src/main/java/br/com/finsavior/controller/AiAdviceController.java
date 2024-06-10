@@ -1,6 +1,7 @@
 package br.com.finsavior.controller;
 
 import br.com.finsavior.model.dto.AiAdviceDTO;
+import br.com.finsavior.model.dto.AiAdviceResponseDTO;
 import br.com.finsavior.model.dto.AiAnalysisResponseDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.service.AiAdviceService;
@@ -20,7 +21,7 @@ public class AiAdviceController {
 
     @PostMapping("/generate-ai-advice-and-insights")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<GenericResponseDTO> generateAiAdviceAndInsights(@RequestBody AiAdviceDTO aiAdvice) {
+    public ResponseEntity<AiAdviceResponseDTO> generateAiAdviceAndInsights(@RequestBody AiAdviceDTO aiAdvice) {
         return service.generateAiAdviceAndInsights(aiAdvice);
     }
 
@@ -28,5 +29,11 @@ public class AiAdviceController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<AiAnalysisResponseDTO>> getAiAdviceAndInsights() {
         return service.getAiAnalysisList();
+    }
+
+    @DeleteMapping("/delete-analysis/{analysisId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<GenericResponseDTO> deleteAnalysis(@PathVariable Long analysisId) {
+        return service.deleteAnalysis(analysisId);
     }
 }
