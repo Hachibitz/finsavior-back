@@ -17,4 +17,6 @@ public class AiAdviceDTO {
     private String cardTable;
     private String date;
     private Double temperature;
+    private LocalDateTime startDate;
+    private LocalDateTime finishDate;
 }
