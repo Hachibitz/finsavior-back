@@ -2,10 +2,10 @@ package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.exception.EventNotFound;
-import br.com.finsavior.grpc.user.Name;
-import br.com.finsavior.grpc.user.Resource;
-import br.com.finsavior.grpc.user.Subscriber;
-import br.com.finsavior.grpc.user.WebhookMessageRequestDTO;
+import br.com.finsavior.grpc.webhook.Name;
+import br.com.finsavior.grpc.webhook.Resource;
+import br.com.finsavior.grpc.webhook.Subscriber;
+import br.com.finsavior.grpc.webhook.WebhookMessageRequestDTO;
 import br.com.finsavior.model.dto.ExternalUserDTO;
 import br.com.finsavior.model.dto.ResourceDTO;
 import br.com.finsavior.model.dto.SubscriberDTO;

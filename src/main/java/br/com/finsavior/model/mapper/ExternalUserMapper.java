@@ -1,6 +1,6 @@
 package br.com.finsavior.model.mapper;
 
-import br.com.finsavior.grpc.user.WebhookMessageRequestDTO;
+import br.com.finsavior.grpc.webhook.WebhookMessageRequestDTO;
 import br.com.finsavior.model.dto.ExternalUserDTO;
 import br.com.finsavior.model.dto.WebhookRequestDTO;
 import br.com.finsavior.model.entities.ExternalUser;

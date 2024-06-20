@@ -1,7 +1,7 @@
 package br.com.finsavior.producer;
 
-import br.com.finsavior.grpc.user.WebhookMessageRequestDTO;
-import br.com.finsavior.model.dto.WebhookRequestDTO;
+
+import br.com.finsavior.grpc.webhook.WebhookMessageRequestDTO;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

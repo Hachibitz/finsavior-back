@@ -2,7 +2,7 @@ syntax="proto3";
 
 import "common.proto";
 
-option java_package = "br.com.finsavior.grpc.user";
+option java_package = "br.com.finsavior.grpc.webhook";
 option java_multiple_files = true;
 
 message WebhookMessageRequestDTO {

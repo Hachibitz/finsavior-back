@@ -1,12 +1,10 @@
 package br.com.finsavior.consumer;
 
-import br.com.finsavior.grpc.user.WebhookMessageRequestDTO;
-import br.com.finsavior.model.dto.WebhookRequestDTO;
+import br.com.finsavior.grpc.webhook.WebhookMessageRequestDTO;
 import br.com.finsavior.model.mapper.ExternalUserMapper;
 import br.com.finsavior.service.WebhookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
