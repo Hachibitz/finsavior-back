@@ -14,4 +14,6 @@ public interface AuthService {
 
     ResponseEntity<String> login(LoginRequestDTO loginRequest, HttpServletRequest request, HttpServletResponse response);
     ResponseEntity<Boolean> validateToken(String token);
+    void passwordRecovery(String email);
+    void resetPassword(String token, String newPassword);
 }

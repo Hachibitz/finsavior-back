@@ -1,14 +1,21 @@
 package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.AuthTokenException;
+import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.grpc.security.AuthServiceGrpc;
 import br.com.finsavior.grpc.security.SignUpRequest;
 import br.com.finsavior.grpc.security.SignUpResponse;
 import br.com.finsavior.model.dto.LoginRequestDTO;
 import br.com.finsavior.model.dto.SignUpRequestDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
+import br.com.finsavior.model.entities.PasswordResetToken;
+import br.com.finsavior.model.entities.User;
+import br.com.finsavior.repository.PasswordResetTokenRepository;
+import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.security.TokenProvider;
 import br.com.finsavior.service.AuthService;
+import br.com.finsavior.service.EmailService;
+import br.com.finsavior.util.PasswordValidator;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -17,6 +24,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -28,21 +37,24 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
     private final Environment environment;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailService emailService;
+    private final UserRepository userRepository;
 
     private AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub;
 
-    public AuthServiceImpl(AuthenticationManager authenticationManager, TokenProvider tokenProvider, Environment environment) {
-        this.authenticationManager = authenticationManager;
-        this.tokenProvider = tokenProvider;
-        this.environment = environment;
-    }
+    private String FINSAVIOR_RESET_PASSWORD_URL;
 
     @PostConstruct
     public void initialize() {
@@ -52,6 +64,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         authServiceBlockingStub = AuthServiceGrpc.newBlockingStub(channel);
+        FINSAVIOR_RESET_PASSWORD_URL = environment.getProperty("finsavior.front.resetPasswordUrl");
     }
 
     @Override
@@ -118,4 +131,50 @@ public class AuthServiceImpl implements AuthService {
             throw e;
         }
     }
+
+    @Override
+    public void passwordRecovery(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new BusinessException("Email não encontrado");
+        }
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken passwordResetToken = new PasswordResetToken();
+        passwordResetToken.setToken(token);
+        passwordResetToken.setUser(user);
+        passwordResetToken.setExpiryDate(LocalDateTime.now().plusMinutes(30));
+
+        String resetUrl = FINSAVIOR_RESET_PASSWORD_URL + token;
+
+        try {
+            passwordResetTokenRepository.save(passwordResetToken);
+            emailService.sendEmail(email, "Password Recovery", "Clique no link para redefinir sua senha: " + resetUrl);
+        } catch (Exception e) {
+            log.error("method: {}, message: {}, error: {}", "sendEmail", "Falha no envio do email", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new BusinessException("Token inválido"));
+
+        if (passwordResetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new BusinessException("Token expirado");
+        }
+
+        if (!PasswordValidator.isValid(newPassword)) {
+            throw new BusinessException("Senha não atende aos requisitos mínimos");
+        }
+
+        User user = passwordResetToken.getUser();
+        user.setPassword(newPassword);
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(passwordResetToken);
+    }
+
 }
