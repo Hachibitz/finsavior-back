@@ -1,6 +1,6 @@
 package br.com.finsavior.consumer;
 
-import br.com.finsavior.grpc.webhook.WebhookMessageRequestDTO;
+import br.com.finsavior.model.dto.WebhookRequestDTO;
 import br.com.finsavior.model.mapper.ExternalUserMapper;
 import br.com.finsavior.service.WebhookService;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +17,12 @@ public class WebhookConsumer {
     private final ExternalUserMapper externalUserMapper;
 
     @KafkaListener(topics = {"${webhook.request.topic.name}"})
-    public void onMessage(final WebhookMessageRequestDTO webhookMessageRequestDTO){
+    public void onMessage(final WebhookRequestDTO webhookRequestDTO){
         try {
-            webhookService.processWebhook(externalUserMapper.toWebhookRequestDTO(webhookMessageRequestDTO));
+            webhookService.processWebhook(webhookRequestDTO);
             log.info("Event for webhook request received successfully event: {}", webhookService);
         }catch (Exception e){
-            log.error("Event failed to be consumed, event: {}, stackTrace: {}", webhookMessageRequestDTO, e.getStackTrace());
+            log.error("Event failed to be consumed, event: {}, stackTrace: {}", webhookRequestDTO, e.getStackTrace());
         }
     }
 }

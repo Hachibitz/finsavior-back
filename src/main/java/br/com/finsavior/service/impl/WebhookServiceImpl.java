@@ -2,10 +2,6 @@ package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.exception.EventNotFound;
-import br.com.finsavior.grpc.webhook.Name;
-import br.com.finsavior.grpc.webhook.Resource;
-import br.com.finsavior.grpc.webhook.Subscriber;
-import br.com.finsavior.grpc.webhook.WebhookMessageRequestDTO;
 import br.com.finsavior.model.dto.ExternalUserDTO;
 import br.com.finsavior.model.dto.ResourceDTO;
 import br.com.finsavior.model.dto.SubscriberDTO;
@@ -57,13 +53,7 @@ public class WebhookServiceImpl implements WebhookService {
     @Override
     public ResponseEntity<?> sendMessage(WebhookRequestDTO webhookRequestDTO) {
         try {
-            WebhookMessageRequestDTO webhookMessageRequestDTO = WebhookMessageRequestDTO.newBuilder()
-                    .setId(webhookRequestDTO.getId())
-                    .setCreateTime(webhookRequestDTO.getCreateTime())
-                    .setEventType(webhookRequestDTO.getEvent_type().toString())
-                    .setResource(buildResource(webhookRequestDTO.getResource()))
-                    .build();
-            webhookProducer.sendMessage(webhookMessageRequestDTO);
+            webhookProducer.sendMessage(webhookRequestDTO);
         }catch (Exception e){
             log.error("Error while sending message for webhook event, error = {}", e.getMessage());
         }
@@ -127,25 +117,5 @@ public class WebhookServiceImpl implements WebhookService {
                     PlanType.fromValue(webhookRequestDTO.getResource().getPlanId()).getPlanTypeId());
             userService.updateUserPlan(externalUser);
         }
-    }
-
-    private Resource buildResource(ResourceDTO resourceDTO) {
-        return Resource.newBuilder()
-                .setId(resourceDTO.getId())
-                .setQuantity(resourceDTO.getQuantity())
-                .setSubscriber(buildSubscriber(resourceDTO.getSubscriber()))
-                .setCreateTime(resourceDTO.getCreateTime())
-                .setPlanId(resourceDTO.getPlanId())
-                .build();
-    }
-
-    private Subscriber buildSubscriber(SubscriberDTO subscriberDTO) {
-        return Subscriber.newBuilder()
-                .setName(Name.newBuilder()
-                        .setGivenName(subscriberDTO.getName().getGiven_name())
-                        .setSurname(subscriberDTO.getName().getSurname())
-                        .build())
-                .setEmail(subscriberDTO.getEmail())
-                .build();
     }
 }
