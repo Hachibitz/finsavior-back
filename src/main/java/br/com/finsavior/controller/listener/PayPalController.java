@@ -18,6 +18,6 @@ public class PayPalController {
 
     @PostMapping("/subscription")
     public ResponseEntity<?> webhookListener(@RequestBody WebhookRequestDTO webhookRequestDTO){
-        return webhookService.processWebhook(webhookRequestDTO);
+        return webhookService.sendMessage(webhookRequestDTO);
     }
 }
