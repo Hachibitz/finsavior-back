@@ -15,6 +15,7 @@ public class JacksonConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         SimpleModule protobufModule = new SimpleModule();
+        protobufModule.addSerializer(Message.class, new ProtobufSerializer());
         objectMapper.registerModule(protobufModule);
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
