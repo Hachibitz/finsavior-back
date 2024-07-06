@@ -1,11 +1,12 @@
 package br.com.finsavior.producer;
 
 
-import br.com.finsavior.grpc.webhook.WebhookMessageRequestDTO;
 import java.util.UUID;
+
+import br.com.finsavior.model.dto.WebhookRequestDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -16,24 +17,29 @@ import org.springframework.stereotype.Component;
 public class WebhookProducer {
 
     private final String topicName;
-    private final KafkaTemplate<String, WebhookMessageRequestDTO> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public WebhookProducer(@Value("${webhook.request.topic.name}") String topicName, KafkaTemplate<String, WebhookMessageRequestDTO> kafkaTemplate) {
+    private final ObjectMapper objectMapper;
+
+    public WebhookProducer(@Value("${webhook.request.topic.name}") String topicName, KafkaTemplate<String, String> kafkaTemplate,
+                           ObjectMapper objectMapper) {
         this.topicName = topicName;
         this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
     }
 
-    private static void accept(SendResult<String, WebhookMessageRequestDTO> result, Throwable ex) {
-        Logger logger = LoggerFactory.getLogger(DeleteAccountProducer.class);
+    private static void accept(SendResult<String, String> result, Throwable ex) {
         if (ex != null) {
-            logger.error("Falha no envio: {}", ex.getMessage());
+            log.error("Falha no envio: {}", ex.getMessage());
         } else {
-            logger.info("Mensagem enviada com sucesso!");
+            log.info("Mensagem enviada com sucesso!");
         }
     }
 
-    public void sendMessage(WebhookMessageRequestDTO message){
+    public void sendMessage(WebhookRequestDTO message) throws JsonProcessingException {
         String id = UUID.randomUUID().toString();
-        kafkaTemplate.send(topicName, id, message).whenComplete(WebhookProducer::accept);
+        String messageJson = objectMapper.writeValueAsString(message);
+        log.info("Publishing message: {}", message);
+        kafkaTemplate.send(topicName, id, messageJson).whenComplete(WebhookProducer::accept);
     }
 }
