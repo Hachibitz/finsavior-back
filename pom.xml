@@ -19,9 +19,6 @@
 		<grpc.java.version>1.57.2</grpc.java.version>
 		<protobuf.serializer.version>7.4.0</protobuf.serializer.version>
 		<spring-kafka.version>3.0.11</spring-kafka.version>
-		<sonar.projectKey>finsavior-back</sonar.projectKey>
-		<sonar.host.url>http://localhost:9000</sonar.host.url>
-		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
 	</properties>
 
 	<repositories>
@@ -191,11 +188,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.sonarsource.scanner.maven</groupId>
-				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.9.1.2184</version>
-			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
