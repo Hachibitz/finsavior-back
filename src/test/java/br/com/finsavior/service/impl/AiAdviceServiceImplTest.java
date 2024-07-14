@@ -1,5 +1,6 @@
 package br.com.finsavior.service.impl;
 
+import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.grpc.tables.AiAdviceRequest;
 import br.com.finsavior.grpc.tables.AiAdviceResponse;
 import br.com.finsavior.grpc.tables.TableDataServiceGrpc;
@@ -12,9 +13,10 @@ import br.com.finsavior.model.enums.Flag;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.test.util.GrpcServicesUtil;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
@@ -37,7 +39,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,29 +57,31 @@ class AiAdviceServiceImplTest {
     @Mock
     private TableDataServiceGrpc.TableDataServiceBlockingStub blockingStub;
 
-    private final TableDataServiceGrpc.TableDataServiceImplBase serviceImpl =
-            GrpcServicesUtil.generateAiAdviceAndInsightsServiceImpl;
+    private String serverName;
+
+    private final TableDataServiceGrpc.TableDataServiceImplBase generateAiAdviceAndInsightsServiceImplSuccess =
+            GrpcServicesUtil.getGenerateAiAdviceAndInsightsServiceImplSuccessCall();
+
+    private final TableDataServiceGrpc.TableDataServiceImplBase generateAiAdviceAndInsightsServiceImplFailure =
+            GrpcServicesUtil.getGenerateAiAdviceAndInsightsServiceImplFailureCall();
 
     @BeforeEach
-    public void before() throws IOException {
+    public void before() {
         Authentication authentication = mock(Authentication.class);
         Mockito.when(authentication.getName()).thenReturn("finsaviorapp");
         SecurityContext securityContext = mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        String serverName = InProcessServerBuilder.generateName();
-        grpcCleanup.register(InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
+        serverName = InProcessServerBuilder.generateName();
 
         ManagedChannel channel = grpcCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
-
         blockingStub = TableDataServiceGrpc.newBlockingStub(channel);
-
         aiAdviceServiceImpl.setTableDataServiceBlockingStub(blockingStub);
     }
 
     @Test
-    void generateAiAdviceAndInsightsSuccess() {
+    void generateAiAdviceAndInsightsSuccess() throws IOException {
         AiAdviceDTO aiAdviceDTO = buildAiAdviceDTO();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -86,11 +89,27 @@ class AiAdviceServiceImplTest {
         User user = buildUser();
 
         Mockito.when(userRepository.findByUsername(authentication.getName())).thenReturn(user);
+        grpcCleanup.register(InProcessServerBuilder.forName(serverName).directExecutor().addService(generateAiAdviceAndInsightsServiceImplSuccess).build().start());
 
         ResponseEntity<AiAdviceResponseDTO> response = aiAdviceServiceImpl.generateAiAdviceAndInsights(aiAdviceDTO);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertTrue(Objects.nonNull(response.getBody()));
         Assertions.assertEquals((long) response.getBody().getId(), aiAdviceResponse.getAnalysisId());
+    }
+
+    @Test
+    void generateAiAdviceAndInsightsFailure() throws IOException {
+        AiAdviceDTO aiAdviceDTO = buildAiAdviceDTO();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = buildUser();
+
+        Mockito.when(userRepository.findByUsername(authentication.getName())).thenReturn(user);
+        grpcCleanup.register(InProcessServerBuilder.forName(serverName).directExecutor().addService(generateAiAdviceAndInsightsServiceImplFailure).build().start());
+
+        Assertions.assertThrows(BusinessException.class, () -> {
+            aiAdviceServiceImpl.generateAiAdviceAndInsights(aiAdviceDTO);
+        });
     }
 
     private User buildUser() {
