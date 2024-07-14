@@ -10,18 +10,22 @@ import br.com.finsavior.model.entities.UserPlan;
 import br.com.finsavior.model.entities.UserProfile;
 import br.com.finsavior.model.enums.Flag;
 import br.com.finsavior.repository.UserRepository;
+import br.com.finsavior.test.util.GrpcServicesUtil;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
-import org.grpcmock.GrpcMock;
-import org.grpcmock.junit5.InProcessGrpcMockExtension;
-import org.junit.jupiter.api.AfterEach;
+import io.grpc.inprocess.InProcessServerBuilder;
+import io.grpc.stub.StreamObserver;
+import io.grpc.testing.GrpcCleanupRule;
+import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +33,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
+import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.Mockito.mock;
 
-@ExtendWith({InProcessGrpcMockExtension.class, MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 class AiAdviceServiceImplTest {
+
+    @Rule
+    public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
     @InjectMocks
     private AiAdviceServiceImpl aiAdviceServiceImpl;
@@ -44,49 +53,39 @@ class AiAdviceServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    private ManagedChannel channel;
+    @Mock
+    private TableDataServiceGrpc.TableDataServiceBlockingStub blockingStub;
+
+    private final TableDataServiceGrpc.TableDataServiceImplBase serviceImpl =
+            GrpcServicesUtil.generateAiAdviceAndInsightsServiceImpl;
 
     @BeforeEach
-    public void before() {
+    public void before() throws IOException {
         Authentication authentication = mock(Authentication.class);
         Mockito.when(authentication.getName()).thenReturn("finsaviorapp");
         SecurityContext securityContext = mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        channel = InProcessChannelBuilder.forName(GrpcMock.getGlobalInProcessName())
-                .usePlaintext()
-                .build();
-        TableDataServiceGrpc.TableDataServiceBlockingStub tableDataServiceBlockingStub = TableDataServiceGrpc.newBlockingStub(channel);
-        aiAdviceServiceImpl.setTableDataServiceBlockingStub(tableDataServiceBlockingStub);
-    }
+        String serverName = InProcessServerBuilder.generateName();
+        grpcCleanup.register(InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
 
-    @AfterEach
-    public void shutdownChannel() {
-        Optional.ofNullable(channel).ifPresent(ManagedChannel::shutdownNow);
+        ManagedChannel channel = grpcCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
+
+        blockingStub = TableDataServiceGrpc.newBlockingStub(channel);
+
+        aiAdviceServiceImpl.setTableDataServiceBlockingStub(blockingStub);
     }
 
     @Test
     void generateAiAdviceAndInsightsSuccess() {
-        AiAdviceDTO aiAdviceDTO = AiAdviceDTO.builder()
-                .analysisTypeId(1)
-                .cardTable("cardTable")
-                .mainAndIncomeTable("mainAndIncomeTable")
-                .date("May 2024")
-                .finishDate(LocalDateTime.now())
-                .startDate(LocalDateTime.now())
-                .temperature(0.0)
-                .build();
+        AiAdviceDTO aiAdviceDTO = buildAiAdviceDTO();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AiAdviceResponse aiAdviceResponse = buildAiAdviceResponse();
         User user = buildUser();
 
         Mockito.when(userRepository.findByUsername(authentication.getName())).thenReturn(user);
-        GrpcMock.stubFor(
-                GrpcMock.unaryMethod(TableDataServiceGrpc.getGenerateAiAdviceAndInsightsMethod())
-                        .willReturn(GrpcMock.response(aiAdviceResponse))
-        );
 
         ResponseEntity<AiAdviceResponseDTO> response = aiAdviceServiceImpl.generateAiAdviceAndInsights(aiAdviceDTO);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -136,16 +135,15 @@ class AiAdviceServiceImplTest {
                 .build();
     }
 
-    private AiAdviceRequest buildAiAdviceRequest(User user) {
-        return AiAdviceRequest.newBuilder()
-                .setUserId(user.getId())
-                .setPrompt("prompt")
-                .setDate("May 2024")
-                .setPlanId(user.getUserPlan().getPlanId())
-                .setAnalysisTypeId(1)
-                .setTemperature(0.0)
-                .setStartDate(LocalDateTime.now().toString())
-                .setFinishDate(LocalDateTime.now().toString())
+    private AiAdviceDTO buildAiAdviceDTO() {
+        return AiAdviceDTO.builder()
+                .analysisTypeId(1)
+                .cardTable("cardTable")
+                .mainAndIncomeTable("mainAndIncomeTable")
+                .date("May 2024")
+                .finishDate(LocalDateTime.now())
+                .startDate(LocalDateTime.now())
+                .temperature(0.0)
                 .build();
     }
 }
