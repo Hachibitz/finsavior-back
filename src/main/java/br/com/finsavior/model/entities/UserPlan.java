@@ -2,13 +2,19 @@ package br.com.finsavior.model.entities;
 
 import br.com.finsavior.model.enums.Flag;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_plan")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UserPlan {
     @Id
     @Column(name = "user_id")
