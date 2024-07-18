@@ -71,9 +71,9 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<String> login(LoginRequestDTO loginRequest, HttpServletRequest request, HttpServletResponse response){
         log.info("Autenticando usuário: "+ loginRequest.getUserLogin()+ "...");
 
-        User user = userRepository.findByEmail(loginRequest.getUserLogin());
+        User user = userRepository.findByUsername(loginRequest.getUserLogin());
         if (user == null) {
-            user = userRepository.findByUsername(loginRequest.getUserLogin());
+            user = userRepository.findByEmail(loginRequest.getUserLogin());
         }
 
         try {
