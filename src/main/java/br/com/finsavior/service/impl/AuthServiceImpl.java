@@ -69,10 +69,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<String> login(LoginRequestDTO loginRequest, HttpServletRequest request, HttpServletResponse response){
-        log.info("Autenticando usuário: "+ loginRequest.getUsername()+ "...");
+        String userLogin = loginRequest.getUserLogin();
+        User user = userRepository.findByUsername(loginRequest.getUserLogin());
+        if(user==null){
+            user = userRepository.findByEmail(loginRequest.getUserLogin());
+            userLogin = user.getUsername();
+        }
+        log.info("Autenticando usuário: "+ loginRequest.getUserLogin()+ "...");
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(userLogin, loginRequest.getPassword())
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
