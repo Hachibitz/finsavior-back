@@ -103,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<Boolean> validateToken(String token) {
-        log.info("Validando token: " + token);
+        log.info("Validando token: {}", token);
         if (token != null && tokenProvider.validateToken(token)){
             return ResponseEntity.ok().body(true);
         }
