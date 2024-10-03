@@ -218,4 +218,9 @@ public class UserServiceImpl implements UserService {
         user.getUserProfile().setUserUpdDtm(LocalDateTime.now());
         user.getUserProfile().setUserUpdId(APP_ID);
     }
+
+    @Override
+    public boolean isUsernameAvailable(String username) {
+        return !userRepository.existsByUsername(username);
+    }
 }

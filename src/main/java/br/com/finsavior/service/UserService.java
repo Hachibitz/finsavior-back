@@ -16,4 +16,5 @@ public interface UserService {
     public ResponseEntity<GenericResponseDTO> uploadProfilePicture(MultipartFile profileData);
     public ResponseEntity<ProfileDataDTO> getProfileData();
     public void updateUserPlan(ExternalUserDTO externalUserdto);
+    public boolean isUsernameAvailable(String username);
 }

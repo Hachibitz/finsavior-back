@@ -41,4 +41,11 @@ public class UserController {
     public ResponseEntity<ProfileDataDTO> getProfileData() {
         return userService.getProfileData();
     }
-}
+
+    @GetMapping("/check-username")
+    public ResponseEntity<Boolean> checkUsernameAvailability(@RequestParam String username) {
+        boolean isAvailable = userService.isUsernameAvailable(username);
+        return ResponseEntity.ok(isAvailable);
+    }
+
+    }
