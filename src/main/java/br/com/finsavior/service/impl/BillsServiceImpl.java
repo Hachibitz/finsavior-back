@@ -68,7 +68,7 @@ public class BillsServiceImpl implements BillsService {
         BillRegisterRequest dataRegisterRequest = BillRegisterRequest.newBuilder()
                 .setUserId(user.getId())
                 .setBillType(billType)
-                .setBillDate(billRegisterRequestDTO.getBillDate())
+                .setBillDate(formatBillDate(billRegisterRequestDTO.getBillDate()))
                 .setBillDescription(billRegisterRequestDTO.getBillDescription())
                 .setBillName(billRegisterRequestDTO.getBillName())
                 .setBillValue(billRegisterRequestDTO.getBillValue())
