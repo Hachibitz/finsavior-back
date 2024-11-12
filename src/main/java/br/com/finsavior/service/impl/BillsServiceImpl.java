@@ -41,9 +41,6 @@ public class BillsServiceImpl implements BillsService {
     private final UserRepository userRepository;
     private final Environment environment;
 
-    //@GrpcClient("main-table-service")
-    //MainServiceGrpc.MainServiceBlockingStub mainServiceBlockingStub;
-
     private TableDataServiceBlockingStub tableDataServiceBlockingStub;
 
     @Autowired
@@ -98,7 +95,7 @@ public class BillsServiceImpl implements BillsService {
 
         MainTableDataRequest mainTableDataRequest = MainTableDataRequest.newBuilder()
                 .setUserId(user.getId())
-                .setBillDate(billDate)
+                .setBillDate(formatBillDate(billDate))
                 .build();
         ModelMapper modelMapper = new ModelMapper();
 
@@ -233,5 +230,13 @@ public class BillsServiceImpl implements BillsService {
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao editar item da tabela de detalhamento de cartões: "+e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    private String formatBillDate(String billDate) {
+        if(billDate.length() == 7) {
+            billDate = billDate.substring(0, 3) + " " + billDate.substring(3, 7);
+        }
+
+        return billDate;
     }
 }

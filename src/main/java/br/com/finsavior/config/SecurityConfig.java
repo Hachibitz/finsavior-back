@@ -38,6 +38,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityConfig {
 	
 	private final CustomAuthenticationProvider customAuthenticationProvider;
+	private static final String TEST_MOBILE_API_URL = "https://localhost"; //moveToConfigServer
 	
 	@Autowired
     UserSecurityDetails userSecurityDetails;
@@ -56,7 +57,7 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		
+
 		http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/**" ,"/login", "/login-auth").permitAll()
 				.anyRequest().authenticated()
 		).formLogin(form -> form.loginProcessingUrl("/login")
@@ -84,7 +85,11 @@ public class SecurityConfig {
 	@Bean
     CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+        corsConfiguration.setAllowedOrigins(Arrays.asList(
+				"http://localhost:4200",
+				"http://localhost:8100",
+				TEST_MOBILE_API_URL
+		));
         corsConfiguration.setAllowedMethods(Arrays.asList(
             HttpMethod.GET.name(),
             HttpMethod.POST.name(),
@@ -94,7 +99,8 @@ public class SecurityConfig {
         corsConfiguration.setAllowedHeaders(Arrays.asList(
             "Authorization",
             "Cache-Control",
-            "Content-Type"
+            "Content-Type",
+			"ngrok-skip-browser-warning"
         ));
 		corsConfiguration.setAllowCredentials(true);
 

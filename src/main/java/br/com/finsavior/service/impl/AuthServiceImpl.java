@@ -94,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
             response.addCookie(tokenCookie);
 
             log.info("class = AuthServiceImpl, method = login, message = Autenticado com sucesso!");
-            return ResponseEntity.ok("Autenticado com sucesso!");
+            return ResponseEntity.ok(token);
         } catch (AuthenticationException e) {
             log.error("class = AuthServiceImpl, method = login");
             throw new RuntimeException("Falha ao autenticar usuário", e);
@@ -103,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<Boolean> validateToken(String token) {
-        log.info("Validando token: " + token);
+        log.info("Validando token: {}", token);
         if (token != null && tokenProvider.validateToken(token)){
             return ResponseEntity.ok().body(true);
         }
