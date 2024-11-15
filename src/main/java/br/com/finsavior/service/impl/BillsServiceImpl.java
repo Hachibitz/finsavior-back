@@ -117,7 +117,7 @@ public class BillsServiceImpl implements BillsService {
 
         CardTableDataRequest cardTableDataRequest = CardTableDataRequest.newBuilder()
                 .setUserId(user.getId())
-                .setBillDate(billDate)
+                .setBillDate(formatBillDate(billDate))
                 .build();
         ModelMapper modelMapper = new ModelMapper();
 
