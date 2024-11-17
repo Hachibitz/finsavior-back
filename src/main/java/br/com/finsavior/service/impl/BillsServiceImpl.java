@@ -79,7 +79,7 @@ public class BillsServiceImpl implements BillsService {
         try {
             BillRegisterResponse billRegisterResponse = tableDataServiceBlockingStub.billRegister(dataRegisterRequest);
             BillRegisterResponseDTO response = new BillRegisterResponseDTO(billRegisterResponse.getStatus(), billRegisterResponse.getMessage());
-            log.info("Registro de tabela principal salvo.");
+            log.debug("Registro salvo na {} table.", billRegisterRequestDTO.getBillTable());
             return ResponseEntity.ok(response);
         } catch (StatusRuntimeException e) {
             log.error(e.getStatus().getDescription());
@@ -172,7 +172,7 @@ public class BillsServiceImpl implements BillsService {
         User user = userRepository.findByUsername(authentication.getName());
 
         BillRegisterRequest billRegisterRequest = BillRegisterRequest.newBuilder()
-                .setBillDate(billRegisterRequestDTO.getBillDate())
+                .setBillDate(formatBillDate(billRegisterRequestDTO.getBillDate()))
                 .setBillDescription(billRegisterRequestDTO.getBillDescription())
                 .setBillTable(billRegisterRequestDTO.getBillTable())
                 .setBillName(billRegisterRequestDTO.getBillName())
@@ -206,7 +206,7 @@ public class BillsServiceImpl implements BillsService {
         User user = userRepository.findByUsername(authentication.getName());
 
         BillRegisterRequest billRegisterRequest = BillRegisterRequest.newBuilder()
-                .setBillDate(billRegisterRequestDTO.getBillDate())
+                .setBillDate(formatBillDate(billRegisterRequestDTO.getBillDate()))
                 .setBillDescription(billRegisterRequestDTO.getBillDescription())
                 .setBillTable(billRegisterRequestDTO.getBillTable())
                 .setBillName(billRegisterRequestDTO.getBillName())
