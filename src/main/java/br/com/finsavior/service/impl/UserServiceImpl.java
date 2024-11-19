@@ -4,7 +4,6 @@ import br.com.finsavior.exception.DeleteUserException;
 import br.com.finsavior.exception.BusinessException;
 import br.com.finsavior.grpc.user.UserServiceGrpc;
 import br.com.finsavior.grpc.user.UserServiceGrpc.UserServiceBlockingStub;
-import br.com.finsavior.grpc.user.DeleteAccountRequest;
 import br.com.finsavior.grpc.user.ChangePasswordRequest;
 import br.com.finsavior.grpc.tables.GenericResponse;
 import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
@@ -12,17 +11,12 @@ import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
 import br.com.finsavior.model.dto.ExternalUserDTO;
 import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.dto.ProfileDataDTO;
-import br.com.finsavior.model.entities.Plan;
-import br.com.finsavior.model.entities.PlanChangeHistory;
-import br.com.finsavior.model.entities.User;
-import br.com.finsavior.model.entities.UserProfile;
+import br.com.finsavior.model.entities.*;
 import br.com.finsavior.model.enums.Flag;
 import br.com.finsavior.model.enums.PlanType;
+import br.com.finsavior.model.enums.UserAccountDeleteStatus;
 import br.com.finsavior.producer.DeleteAccountProducer;
-import br.com.finsavior.repository.PlanHistoryRepository;
-import br.com.finsavior.repository.PlanRepository;
-import br.com.finsavior.repository.UserProfileRepository;
-import br.com.finsavior.repository.UserRepository;
+import br.com.finsavior.repository.*;
 import br.com.finsavior.service.UserService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -40,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Base64;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -53,18 +48,23 @@ public class UserServiceImpl implements UserService {
     private final UserProfileRepository userProfileRepository;
     private final PlanRepository planRepository;
     private final PlanHistoryRepository planHistoryRepository;
+    private final UserDeleteRepository userDeleteRepository;
 
     private UserServiceBlockingStub userServiceBlockingStub;
     private final static String APP_ID = "finsavior-app";
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer, Environment environment, UserProfileRepository userProfileRepository, PlanRepository planRepository, PlanHistoryRepository planHistoryRepository) {
+    public UserServiceImpl(UserRepository userRepository, DeleteAccountProducer deleteAccountProducer,
+                           Environment environment, UserProfileRepository userProfileRepository,
+                           PlanRepository planRepository, PlanHistoryRepository planHistoryRepository,
+                           UserDeleteRepository userDeleteRepository) {
         this.userRepository = userRepository;
         this.deleteAccountProducer = deleteAccountProducer;
         this.environment = environment;
         this.userProfileRepository = userProfileRepository;
         this.planRepository = planRepository;
         this.planHistoryRepository = planHistoryRepository;
+        this.userDeleteRepository = userDeleteRepository;
     }
 
     @PostConstruct
@@ -78,25 +78,58 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> deleteAccount(DeleteAccountRequestDTO deleteAccountRequestDTO) {
-        DeleteAccountRequest message = DeleteAccountRequest.newBuilder()
-                .setUsername(deleteAccountRequestDTO.getUsername())
-                .setPassword(deleteAccountRequestDTO.getPassword())
-                .setConfirmation(deleteAccountRequestDTO.isConfirmation())
-                .build();
+    public void deleteAccount(DeleteAccountRequestDTO deleteAccountRequestDTO) {
+        User user = validateDeleteAccountRequest(deleteAccountRequestDTO);
+        UserDelete userDelete = userDeleteRepository.findByUserId(user.getId());
+
+        if(userDelete != null) {
+            userDelete.setUserUpdDtm(LocalDateTime.now());
+            userDelete.setUserUpdId(APP_ID);
+            userDelete.setStatusId(UserAccountDeleteStatus.IN_PROCESS.getId());
+        } else {
+            userDelete = UserDelete.builder()
+                    .userId(user.getId())
+                    .statusId(UserAccountDeleteStatus.IN_PROCESS.getId())
+                    .userInsId(APP_ID)
+                    .userInsDtm(LocalDateTime.now())
+                    .userUpdId(APP_ID)
+                    .userUpdDtm(LocalDateTime.now())
+                    .delFg(Flag.N)
+                    .build();
+        }
+
+        userDeleteRepository.save(userDelete);
 
         try {
-            GenericResponseDTO genericResponseDTO = new GenericResponseDTO(HttpStatus.OK.name(), "Conta adicionada na fila de exclusão com sucesso. Exclusão será processada nas próximas horas junto com todos os dados da conta.");
-            deleteAccountProducer.sendMessage(message);
-            log.info("Exclusão do usuário "+deleteAccountRequestDTO.getUsername()+" enviada para a fila com sucesso.");
-            return ResponseEntity.ok(genericResponseDTO);
-        } catch (StatusRuntimeException e) {
-            log.error("Erro na exclusão, tente novamente em alguns minutos."+e.getStatus().getDescription());
-            throw new DeleteUserException("Erro na exclusão: " + e.getStatus().getDescription());
+            deleteAccountProducer.sendMessage(deleteAccountRequestDTO);
+            log.info("Exclusão do usuário {} {}", deleteAccountRequestDTO.getUsername(), " enviada para a fila com sucesso.");
         } catch (Exception e) {
-            log.error("Erro na exclusão, tente novamente em alguns minutos."+e.getMessage());
+            log.error("method: {}, message: {},error: {}", "deleteAccount", "falha no envio para a fila", e.getMessage());
             throw new DeleteUserException("Erro na exclusão, tente novamente em alguns minutos.");
         }
+    }
+
+    private User validateDeleteAccountRequest(DeleteAccountRequestDTO request) {
+        if(!request.isConfirmation()) throw new DeleteUserException("Erro na exclusão: confirmação necessária.");
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+
+        if(!(user.getUsername().equals(request.getUsername())) ||
+                !(user.getPassword().equals(request.getPassword()))) throw new DeleteUserException("Usuário ou senha incorretos");
+
+
+        Optional<UserDelete> userDelete = Optional.ofNullable(userDeleteRepository.findByUserId(user.getId()));
+        UserAccountDeleteStatus accountDeleteStatus = null;
+
+        if(userDelete.isPresent()) {
+            accountDeleteStatus = UserAccountDeleteStatus.fromId(userDelete.get().getStatusId());
+        }
+
+        if(accountDeleteStatus != null && accountDeleteStatus.equals(UserAccountDeleteStatus.IN_PROCESS))
+            throw new DeleteUserException("Erro na exclusão: já existe uma solicitação em andamento.");
+
+        return user;
     }
 
     @Override

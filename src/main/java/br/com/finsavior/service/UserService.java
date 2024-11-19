@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public interface UserService {
-    public ResponseEntity<?> deleteAccount(DeleteAccountRequestDTO deleteAccountRequestDTO);
+    public void deleteAccount(DeleteAccountRequestDTO deleteAccountRequestDTO);
     public ResponseEntity<?> changeAccountPassword(ChangePasswordRequestDTO changePasswordRequestDTO);
     public ResponseEntity<GenericResponseDTO> uploadProfilePicture(MultipartFile profileData);
     public ResponseEntity<ProfileDataDTO> getProfileData();

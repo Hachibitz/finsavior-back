@@ -37,6 +37,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("Credenciais inválidas");
         }
 
+        if (!user.isEnabled() || user.isDelFg()) {
+            throw new BadCredentialsException("Usuário não encontrado");
+        }
+
         List<GrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach((role) -> {
         	authorities.add(new SimpleGrantedAuthority(role.getName().name()));

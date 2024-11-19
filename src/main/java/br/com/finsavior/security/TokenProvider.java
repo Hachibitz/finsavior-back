@@ -2,9 +2,12 @@ package br.com.finsavior.security;
 
 import java.util.Date;
 
+import br.com.finsavior.model.entities.User;
+import br.com.finsavior.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -22,9 +25,14 @@ public class TokenProvider {
 
     @Value("${app.jwtExpirationMsForRememberMe}")
     private Long jwtExpirationMsForRememberMe;
-    
-    @Autowired
-    UserSecurityDetails userSecurityDetails;
+
+    private final UserSecurityDetails userSecurityDetails;
+    private final UserRepository userRepository;
+
+    public TokenProvider(UserSecurityDetails userSecurityDetails, UserRepository userRepository) {
+        this.userSecurityDetails = userSecurityDetails;
+        this.userRepository = userRepository;
+    }
 
     public String generateToken(Authentication authentication, boolean rememberMe) {
         CustomUserDetails customUserDetails = (CustomUserDetails) userSecurityDetails.loadUserByUsername(authentication.getPrincipal().toString());
@@ -57,7 +65,11 @@ public class TokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).build().parseClaimsJws(token);
-            return true;
+
+            String username = getUsernameFromToken(token);
+            User user = userRepository.findByUsername(username);
+
+            return !user.isDelFg() && user.isEnabled();
         } catch (Exception e) {
             e.printStackTrace();
         }

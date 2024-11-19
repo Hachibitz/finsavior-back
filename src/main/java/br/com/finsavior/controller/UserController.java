@@ -7,6 +7,7 @@ import br.com.finsavior.model.dto.GenericResponseDTO;
 import br.com.finsavior.model.dto.ProfileDataDTO;
 import br.com.finsavior.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +22,9 @@ public class UserController {
 
     @PostMapping("/delete-account")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> deleteAccountAndData(@RequestBody DeleteAccountRequestDTO deleteAccountRequest) {
-        return userService.deleteAccount(deleteAccountRequest);
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteAccountAndData(@RequestBody DeleteAccountRequestDTO deleteAccountRequest) {
+        userService.deleteAccount(deleteAccountRequest);
     }
 
     @PostMapping("/change-password")
