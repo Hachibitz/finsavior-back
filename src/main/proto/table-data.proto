@@ -120,4 +120,5 @@ service TableDataService {
   rpc deleteAiAnalysis(DeleteAiAnalysisRequest) returns (GenericResponse);
   rpc getAiAnalysisList(AiAnalysisRequest) returns (AiAnalysisResponse);
   rpc deleteAllUserData(DeleteAllDataRequest) returns (GenericResponse);
+  rpc cardPaymentRegister(BillRegisterRequest) returns (BillRegisterResponse);
 }

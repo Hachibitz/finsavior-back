@@ -57,4 +57,10 @@ public class BillsController {
     public ResponseEntity<GenericResponseDTO> editItemFromMainTable(@RequestBody BillRegisterRequestDTO billRegisterRequestDTO) {
         return service.editItemFromMainTable(billRegisterRequestDTO);
     }
+
+    @PostMapping("/card-payment-register")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<BillRegisterResponseDTO> cardPaymentRegister(@RequestBody BillRegisterRequestDTO billRegisterRequestDTO) {
+        return service.cardPaymentRegister(billRegisterRequestDTO);
+    }
 }

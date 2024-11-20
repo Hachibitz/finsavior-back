@@ -1,5 +1,6 @@
 package br.com.finsavior.service.impl;
 
+import br.com.finsavior.exception.BillRegisterException;
 import br.com.finsavior.grpc.tables.TableDataServiceGrpc;
 import br.com.finsavior.grpc.tables.TableDataServiceGrpc.TableDataServiceBlockingStub;
 import br.com.finsavior.grpc.tables.BillRegisterRequest;
@@ -229,6 +230,34 @@ public class BillsServiceImpl implements BillsService {
             e.printStackTrace();
             GenericResponseDTO response = new GenericResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Falha ao editar item da tabela de detalhamento de cartões: "+e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @Override
+    public ResponseEntity<BillRegisterResponseDTO> cardPaymentRegister(BillRegisterRequestDTO billRegisterRequestDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+        String billType = billRegisterRequestDTO.getBillType() == null ? "" : billRegisterRequestDTO.getBillType();
+
+        BillRegisterRequest dataRegisterRequest = BillRegisterRequest.newBuilder()
+                .setUserId(user.getId())
+                .setBillType(billType)
+                .setBillDate(formatBillDate(billRegisterRequestDTO.getBillDate()))
+                .setBillDescription(billRegisterRequestDTO.getBillDescription())
+                .setBillName(billRegisterRequestDTO.getBillName())
+                .setBillValue(billRegisterRequestDTO.getBillValue())
+                .setBillTable(billRegisterRequestDTO.getBillTable())
+                .setIsRecurrent(false)
+                .build();
+
+        try {
+            BillRegisterResponse billRegisterResponse = tableDataServiceBlockingStub.cardPaymentRegister(dataRegisterRequest);
+            BillRegisterResponseDTO response = new BillRegisterResponseDTO(billRegisterResponse.getStatus(), billRegisterResponse.getMessage());
+            log.debug("Registro salvo na {} table.", billRegisterRequestDTO.getBillTable());
+            return ResponseEntity.ok(response);
+        } catch (StatusRuntimeException e) {
+            log.error("c={}, m={}, msg={}", this.getClass().getSimpleName(), "cardPaymentRegister", e.getStatus().getDescription());
+            throw new BillRegisterException(e.getStatus().getDescription());
         }
     }
 

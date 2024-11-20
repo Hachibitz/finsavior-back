@@ -1,9 +1,6 @@
 package br.com.finsavior.controller.advice;
 
-import br.com.finsavior.exception.DeleteUserException;
-import br.com.finsavior.exception.BusinessException;
-import br.com.finsavior.exception.AuthTokenException;
-import br.com.finsavior.exception.PaymentException;
+import br.com.finsavior.exception.*;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -66,6 +63,7 @@ public class ApiExceptionHandler {
             DeleteUserException.class,
             NullPointerException.class,
             AccessDeniedException.class,
+            UpdateProfileException.class
     })
     public ResponseEntity<ApiErrorHandlerResponse> handler(Exception e){
         log.error("ApiExceptionHandler, message={}", e.getMessage(), e);

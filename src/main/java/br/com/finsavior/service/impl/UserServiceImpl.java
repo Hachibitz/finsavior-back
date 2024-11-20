@@ -2,15 +2,12 @@ package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.DeleteUserException;
 import br.com.finsavior.exception.BusinessException;
+import br.com.finsavior.exception.UpdateProfileException;
 import br.com.finsavior.grpc.user.UserServiceGrpc;
 import br.com.finsavior.grpc.user.UserServiceGrpc.UserServiceBlockingStub;
 import br.com.finsavior.grpc.user.ChangePasswordRequest;
 import br.com.finsavior.grpc.tables.GenericResponse;
-import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
-import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
-import br.com.finsavior.model.dto.ExternalUserDTO;
-import br.com.finsavior.model.dto.GenericResponseDTO;
-import br.com.finsavior.model.dto.ProfileDataDTO;
+import br.com.finsavior.model.dto.*;
 import br.com.finsavior.model.entities.*;
 import br.com.finsavior.model.enums.Flag;
 import br.com.finsavior.model.enums.PlanType;
@@ -224,6 +221,33 @@ public class UserServiceImpl implements UserService {
             log.info("method = updateUserPlan, message = Plano do user: {}, atualizado com sucesso!", externalUserdto.getUserId());
         }catch (Exception e){
             throw new BusinessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateProfile(MultipartFile profilePicture, UpdateProfileRequestDTO updateProfileRequest) {
+        try {
+            if(profilePicture != null) {
+                uploadProfilePicture(profilePicture);
+            }
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = userRepository.findByUsername(authentication.getName());
+
+            if(updateProfileRequest.getFirstName() != null) {
+                user.setFirstName(updateProfileRequest.getFirstName());
+            }
+
+            if(updateProfileRequest.getLastName() != null) {
+                user.setLastName(updateProfileRequest.getLastName());
+            }
+
+            user.getUserProfile().setName(user.getFirstName()+user.getLastName());
+
+            userRepository.save(user);
+        } catch (UpdateProfileException e) {
+            log.error("c={}, m={}, msg={}", this.getClass().getSimpleName(), "updateProfile", e.getMessage());
+            throw(e);
         }
     }
 

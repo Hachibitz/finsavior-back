@@ -1,10 +1,7 @@
 package br.com.finsavior.controller;
 
 import br.com.finsavior.grpc.tables.GenericResponse;
-import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
-import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
-import br.com.finsavior.model.dto.GenericResponseDTO;
-import br.com.finsavior.model.dto.ProfileDataDTO;
+import br.com.finsavior.model.dto.*;
 import br.com.finsavior.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,5 +39,20 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ProfileDataDTO> getProfileData() {
         return userService.getProfileData();
+    }
+
+    @PatchMapping("/profile-data/update-profile")
+    @PreAuthorize("hasRole('USER')")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateProfile(
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            @RequestParam(value = "firstName", required = false) String firstName,
+            @RequestParam(value = "lastName", required = false) String lastName) {
+
+        UpdateProfileRequestDTO updateProfileRequest = new UpdateProfileRequestDTO();
+        updateProfileRequest.setFirstName(firstName);
+        updateProfileRequest.setLastName(lastName);
+
+        userService.updateProfile(profilePicture, updateProfileRequest);
     }
 }

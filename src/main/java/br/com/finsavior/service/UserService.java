@@ -1,10 +1,6 @@
 package br.com.finsavior.service;
 
-import br.com.finsavior.model.dto.ChangePasswordRequestDTO;
-import br.com.finsavior.model.dto.DeleteAccountRequestDTO;
-import br.com.finsavior.model.dto.ExternalUserDTO;
-import br.com.finsavior.model.dto.GenericResponseDTO;
-import br.com.finsavior.model.dto.ProfileDataDTO;
+import br.com.finsavior.model.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,4 +12,5 @@ public interface UserService {
     public ResponseEntity<GenericResponseDTO> uploadProfilePicture(MultipartFile profileData);
     public ResponseEntity<ProfileDataDTO> getProfileData();
     public void updateUserPlan(ExternalUserDTO externalUserdto);
+    public void updateProfile(MultipartFile profilePicture, UpdateProfileRequestDTO updateProfileRequest);
 }
