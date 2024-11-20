@@ -63,4 +63,10 @@ public class BillsController {
     public ResponseEntity<BillRegisterResponseDTO> cardPaymentRegister(@RequestBody BillRegisterRequestDTO billRegisterRequestDTO) {
         return service.cardPaymentRegister(billRegisterRequestDTO);
     }
+
+    @GetMapping("/load-payment-card-table-data")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> loadPaymentCardTableData(@RequestParam String billDate) {
+        return service.loadPaymentCardTableData(billDate);
+    }
 }

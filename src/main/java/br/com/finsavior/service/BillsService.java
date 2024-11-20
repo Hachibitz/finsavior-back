@@ -18,4 +18,5 @@ public interface BillsService {
     public ResponseEntity<GenericResponseDTO> editItemFromMainTable(BillRegisterRequestDTO billRegisterRequestDTO);
     public ResponseEntity<GenericResponseDTO> editItemFromCardTable(BillRegisterRequestDTO billRegisterRequestDTO);
     ResponseEntity<BillRegisterResponseDTO> cardPaymentRegister(BillRegisterRequestDTO billRegisterRequestDTO);
+    ResponseEntity<?> loadPaymentCardTableData(String billDate);
 }

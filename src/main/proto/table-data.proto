@@ -108,6 +108,23 @@ message DeleteAiAnalysisRequest {
   int64 aiAnalysisId = 1;
 }
 
+message PaymentCardTableData {
+  int64 id = 1;
+  string billDate = 2;
+  string billName = 3;
+  double billValue = 4;
+  string billDescription = 5;
+}
+
+message PaymentCardTableDataRequest {
+  int64 userId = 1;
+  string billDate = 2;
+}
+
+message PaymentCardTableDataResponse {
+  repeated PaymentCardTableData paymentCardTableData = 1;
+}
+
 service TableDataService {
   rpc billRegister(BillRegisterRequest) returns (BillRegisterResponse);
   rpc loadMainTableData(MainTableDataRequest) returns (MainTableDataResponse);
@@ -121,4 +138,5 @@ service TableDataService {
   rpc getAiAnalysisList(AiAnalysisRequest) returns (AiAnalysisResponse);
   rpc deleteAllUserData(DeleteAllDataRequest) returns (GenericResponse);
   rpc cardPaymentRegister(BillRegisterRequest) returns (BillRegisterResponse);
+  rpc loadPaymentCardTableData(PaymentCardTableDataRequest) returns (PaymentCardTableDataResponse);
 }

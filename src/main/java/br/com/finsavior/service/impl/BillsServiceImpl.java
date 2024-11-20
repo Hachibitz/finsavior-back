@@ -1,22 +1,10 @@
 package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.BillRegisterException;
-import br.com.finsavior.grpc.tables.TableDataServiceGrpc;
+import br.com.finsavior.grpc.payment.Payment;
+import br.com.finsavior.grpc.tables.*;
 import br.com.finsavior.grpc.tables.TableDataServiceGrpc.TableDataServiceBlockingStub;
-import br.com.finsavior.grpc.tables.BillRegisterRequest;
-import br.com.finsavior.grpc.tables.BillRegisterResponse;
-import br.com.finsavior.grpc.tables.MainTableDataResponse;
-import br.com.finsavior.grpc.tables.MainTableDataRequest;
-import br.com.finsavior.grpc.tables.CardTableDataRequest;
-import br.com.finsavior.grpc.tables.CardTableDataResponse;
-import br.com.finsavior.grpc.tables.DeleteItemFromTableRequest;
-import br.com.finsavior.grpc.tables.GenericResponse;
-import br.com.finsavior.grpc.tables.BillUpdateRequest;
-import br.com.finsavior.model.dto.BillRegisterRequestDTO;
-import br.com.finsavior.model.dto.BillRegisterResponseDTO;
-import br.com.finsavior.model.dto.CardTableDataResponseDTO;
-import br.com.finsavior.model.dto.GenericResponseDTO;
-import br.com.finsavior.model.dto.MainTableDataResponseDTO;
+import br.com.finsavior.model.dto.*;
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.service.BillsService;
@@ -258,6 +246,27 @@ public class BillsServiceImpl implements BillsService {
         } catch (StatusRuntimeException e) {
             log.error("c={}, m={}, msg={}", this.getClass().getSimpleName(), "cardPaymentRegister", e.getStatus().getDescription());
             throw new BillRegisterException(e.getStatus().getDescription());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> loadPaymentCardTableData(String billDate) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(authentication.getName());
+
+        PaymentCardTableDataRequest paymentCardTableDataRequest = PaymentCardTableDataRequest.newBuilder()
+                .setUserId(user.getId())
+                .setBillDate(formatBillDate(billDate))
+                .build();
+
+        ModelMapper modelMapper = new ModelMapper();
+        try {
+            PaymentCardTableDataResponse paymentCardTableDataResponse = tableDataServiceBlockingStub.loadPaymentCardTableData(paymentCardTableDataRequest);
+            PaymentCardTableDataResponseDTO response = modelMapper.map(paymentCardTableDataResponse, PaymentCardTableDataResponseDTO.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("c={}, m={}, msg={}", this.getClass().getSimpleName(), "loadPaymentCardTableData", e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
