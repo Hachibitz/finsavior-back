@@ -4,6 +4,7 @@ import java.util.Date;
 
 import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
+@Slf4j
 public class TokenProvider {
 
     @Value("${app.jwtSecret}")
@@ -34,19 +36,33 @@ public class TokenProvider {
         this.userRepository = userRepository;
     }
 
-    public String generateToken(Authentication authentication, boolean rememberMe) {
+    public String generateToken(Authentication authentication) {
         CustomUserDetails customUserDetails = (CustomUserDetails) userSecurityDetails.loadUserByUsername(authentication.getPrincipal().toString());
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        if (rememberMe) {
-            expiryDate = new Date(now.getTime() + jwtExpirationMsForRememberMe);
-        }
-
         return Jwts.builder()
         		.claim("username", customUserDetails.getUsername())
                 .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
+
+    public String generateRefreshToken(String username, Boolean isRemeberMe) {
+        Date now = new Date();
+        Date expiryDate = new Date();
+        if(isRemeberMe) {
+            expiryDate = new Date(now.getTime() + jwtExpirationMsForRememberMe);
+        } else {
+            Integer fifteenMinutesInMs = 900000;
+            expiryDate = new Date(now.getTime() + fifteenMinutesInMs);
+        }
+
+        return Jwts.builder()
+                .claim("username", username)
+                .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
@@ -71,7 +87,7 @@ public class TokenProvider {
 
             return !user.isDelFg() && user.isEnabled();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("c={}, m={}, msg={}", this.getClass().getSimpleName(), "validateToken", e.getMessage());
         }
         return false;
     }

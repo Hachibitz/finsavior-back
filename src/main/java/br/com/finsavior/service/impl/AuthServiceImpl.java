@@ -2,6 +2,7 @@ package br.com.finsavior.service.impl;
 
 import br.com.finsavior.exception.AuthTokenException;
 import br.com.finsavior.exception.BusinessException;
+import br.com.finsavior.exception.UserNotFoundException;
 import br.com.finsavior.grpc.security.AuthServiceGrpc;
 import br.com.finsavior.grpc.security.SignUpRequest;
 import br.com.finsavior.grpc.security.SignUpResponse;
@@ -13,9 +14,12 @@ import br.com.finsavior.model.entities.User;
 import br.com.finsavior.repository.PasswordResetTokenRepository;
 import br.com.finsavior.repository.UserRepository;
 import br.com.finsavior.security.TokenProvider;
+import br.com.finsavior.security.UserSecurityDetails;
 import br.com.finsavior.service.AuthService;
 import br.com.finsavior.service.EmailService;
+import br.com.finsavior.service.GoogleAuthService;
 import br.com.finsavior.util.PasswordValidator;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -34,11 +38,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -51,6 +61,8 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final UserRepository userRepository;
+    private final GoogleAuthService googleAuthService;
+    private final UserSecurityDetails userSecurityDetails;
 
     private AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub;
 
@@ -68,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<String> login(LoginRequestDTO loginRequest, HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<Map<String, String>> login(LoginRequestDTO loginRequest, HttpServletRequest request, HttpServletResponse response){
         String userLogin = loginRequest.getUserLogin();
         User user = userRepository.findByUsername(loginRequest.getUserLogin());
         if(user==null){
@@ -82,22 +94,117 @@ public class AuthServiceImpl implements AuthService {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String token = tokenProvider.generateToken(authentication, loginRequest.isRememberMe());
-            Cookie tokenCookie = new Cookie("token", token);
 
-            tokenCookie.setDomain(request.getServerName());
-            tokenCookie.setPath("/");
-            tokenCookie.setMaxAge(120*60); //120 minutos
-            if(loginRequest.isRememberMe()) {
-                tokenCookie.setMaxAge(43800*60); //1 mês
-            }
+            String accessToken = tokenProvider.generateToken(authentication);
+            String refreshToken = tokenProvider.generateRefreshToken(userLogin, loginRequest.isRememberMe());
+
+            Cookie tokenCookie = new Cookie("accessToken", accessToken);
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+
+            setCookieProperties(
+                    tokenCookie, refreshTokenCookie,
+                    loginRequest.isRememberMe(), request.getServerName()
+            );
             response.addCookie(tokenCookie);
+            response.addCookie(refreshTokenCookie);
 
-            log.info("class = AuthServiceImpl, method = login, message = Autenticado com sucesso!");
-            return ResponseEntity.ok(token);
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", refreshToken);
+
+            log.info(
+                    "c={}, m={}, msg={}",
+                    this.getClass().getSimpleName(),
+                    "login", "Autenticado com sucesso!"
+            );
+            return ResponseEntity.ok(tokens);
         } catch (AuthenticationException e) {
-            log.error("class = AuthServiceImpl, method = login");
+            log.error(
+                    "c={}, m={}, msg={}",
+                    this.getClass().getSimpleName(),
+                    "login", e.getMessage()
+            );
             throw new RuntimeException("Falha ao autenticar usuário", e);
+        }
+    }
+
+    private void setCookieProperties(
+            Cookie tokenCookie, Cookie refreshTokenCookie,
+            Boolean isRemeberMe, String serverName
+    ) {
+        int fifteenMinutesInMs = 15*60;
+        tokenCookie.setDomain(serverName);
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(fifteenMinutesInMs);
+
+        refreshTokenCookie.setDomain(serverName);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(fifteenMinutesInMs);
+
+        if(isRemeberMe) {
+            int thirtyDaysExpirationInMs = 43800 * 60;
+            refreshTokenCookie.setMaxAge(thirtyDaysExpirationInMs);
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> refreshToken(String refreshToken) {
+        if (tokenProvider.validateToken(refreshToken)) {
+            String username = tokenProvider.getUsernameFromToken(refreshToken);
+            User user = userRepository.findByUsername(username);
+
+            if (user == null || user.isDelFg() || !user.isEnabled()) {
+                throw new AuthTokenException("Usuário inválido ou inativo.", HttpStatus.UNAUTHORIZED);
+            }
+
+            List<GrantedAuthority> authorities = user.getRoles().stream()
+                    .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                    .collect(Collectors.toList());
+
+            String newAccessToken = tokenProvider.generateToken(
+                    new UsernamePasswordAuthenticationToken(username, null, authorities)
+            );
+
+            return ResponseEntity.ok(newAccessToken);
+        }
+
+        throw new AuthTokenException("Refresh token inválido ou expirado.", HttpStatus.UNAUTHORIZED);
+    }
+
+
+    @Override
+    public ResponseEntity<Map<String, String>> loginWithGoogle(String idTokenString, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            GoogleIdToken.Payload payload = googleAuthService.validateGoogleToken(idTokenString);
+
+            String email = payload.getEmail();
+            User user = userRepository.findByEmail(email);
+
+            if (user == null) {
+                throw new UserNotFoundException("Usuário não encontrado.");
+            }
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    user.getUsername(), null, userSecurityDetails.loadUserByUsername(user.getUsername()).getAuthorities()
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String accessToken = tokenProvider.generateToken(authentication);
+            String refreshToken = tokenProvider.generateRefreshToken(user.getUsername(), true);
+
+            Cookie tokenCookie = new Cookie("accessToken", accessToken);
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            setCookieProperties(tokenCookie, refreshTokenCookie, true, request.getServerName());
+
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", refreshToken);
+
+            response.addCookie(tokenCookie);
+            response.addCookie(refreshTokenCookie);
+
+            return ResponseEntity.ok(tokens);
+        } catch (Exception e) {
+            throw new AuthTokenException(e.getMessage());
         }
     }
 

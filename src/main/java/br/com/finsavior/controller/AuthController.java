@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("auth")
 public class AuthController {
@@ -25,13 +27,23 @@ public class AuthController {
     }
 
     @PostMapping("/login-auth")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDTO loginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequestDTO loginRequest, HttpServletRequest request, HttpServletResponse response) {
         return authService.login(loginRequest, request, response);
+    }
+
+    @PostMapping("/login-google")
+    public ResponseEntity<Map<String, String>> loginWithGoogle(@RequestBody String idTokenString, HttpServletRequest request, HttpServletResponse response) {
+        return authService.loginWithGoogle(idTokenString, request, response);
     }
 
     @GetMapping("/validate-token")
     public ResponseEntity<Boolean> validateToken(@RequestParam String token) {
         return authService.validateToken(token);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<String> refreshToken(@RequestBody String refreshToken) {
+        return authService.refreshToken(refreshToken);
     }
 
     @PostMapping("/password-recovery")
